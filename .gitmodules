@@ -1,0 +1,4 @@
+[submodule "sam-aws-layer"]
+	path = sam-aws-layer
+	url = https://github.com/faraz-35/sam-aws-layer.git
+	branch = v1-dynamodb

@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    serverless-placeholder object function stack
+
+    Sample SAM Template for serverless-placeholder
+
+Parameters:
+    AWSLayer:
+        Type: String
+        Description: The ARN of the AWSLayer
+    DepLayer:
+        Type: String
+        Description: The ARN of the DepLayer
+    Environment:
+        Type: String
+        AllowedValues: [DEV, PROD]
+        Default: DEV
+
+Globals:
+    Function:
+        Timeout: 3
+        MemorySize: 128
+        Runtime: nodejs14.x
+        Architectures:
+            - x86_64
+        Handler: app.lambdaHandler
+        Environment:
+            Variables:
+                TABLE_NAME: !Ref ObjectTable
+                ENV: !Ref Environment
+        Tags:
+            Environment: !Ref Environment
+        Layers:
+            - !Ref AWSLayer
+            - !Ref DepLayer
+
+Resources:
+    ObjectApi:
+        Type: AWS::Serverless::HttpApi
+        Properties:
+            StageName: Dev
+            Tags:
+                Environment: !Ref Environment
+
+    ObjectTable:
+        Type: AWS::Serverless::SimpleTable
+        Properties:
+            PrimaryKey:
+                Name: id
+                Type: String
+            TableName: ObjectTable
+
+    ObjectAdminFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: ../functions/object/object-admin/
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref ObjectTable
+            Events:
+                ObjectApi:
+                    Type: HttpApi
+                    Properties:
+                        Path: /object-admin
+                        Method: ANY
+                        ApiId: !Ref ObjectApi
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Minify: true
+                Target: es2020
+                EntryPoints:
+                    - app.ts
+                External:
+                    - uuid
+                    - /opt/nodejs/dynamodb/*
+
+Outputs:
+    ObjectApi:
+        Description: 'API Gateway endpoint URL for Prod stage for ObjectApi function'
+        Value: !Sub 'https://${ObjectApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/'
