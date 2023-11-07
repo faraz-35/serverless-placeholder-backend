@@ -1,63 +1,75 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  serverless-placeholder
+    serverless-placeholder
 
-  Sample SAM Template for serverless-placeholder
+    Sample SAM Template for serverless-placeholder
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
-Globals:
-  Function:
-    Timeout: 3
-    MemorySize: 128
+Parameters:
+    Environment:
+        Type: String
+        AllowedValues: [LOCAL, DEV, PROD]
+        Default: DEV
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: hello-world/
-      Handler: app.lambdaHandler
-      Runtime: nodejs14.x
-      Architectures:
-      - x86_64
-      Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /hello
-            Method: get
-    Metadata: # Manage esbuild properties
-      BuildMethod: esbuild
-      BuildProperties:
-        Minify: true
-        Target: es2020
-        # Sourcemap: true # Enabling source maps will create the required NODE_OPTIONS environment variables on your lambda function during sam build
-        EntryPoints:
-        - app.ts
+    DepLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            Description: Dependencies for placeholder app
+            ContentUri: './layers/dependencies/'
+            CompatibleRuntimes:
+                - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Delete
+    AWSLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            Description: AWS Dependencies for placeholder app
+            ContentUri: './dist/layers/aws/'
+            CompatibleRuntimes:
+                - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Delete
 
-  ApplicationResourceGroup:
-    Type: AWS::ResourceGroups::Group
-    Properties:
-      Name:
-        Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
-      ResourceQuery:
-        Type: CLOUDFORMATION_STACK_1_0
-  ApplicationInsightsMonitoring:
-    Type: AWS::ApplicationInsights::Application
-    Properties:
-      ResourceGroupName:
-        Ref: ApplicationResourceGroup
-      AutoConfigurationEnabled: 'true'
+    ObjectStack:
+        Type: AWS::Serverless::Application
+        Properties:
+            Location: ./templates/object-stack.yaml
+            Parameters:
+                AWSLayer: !Ref AWSLayer
+                DepLayer: !Ref DepLayer
+                Environment: !Ref Environment
+            Tags:
+                Environment: !Ref Environment
+
+    UserStack:
+        Type: AWS::Serverless::Application
+        Properties:
+            Location: ./templates/user-stack.yaml
+            Parameters:
+                AWSLayer: !Ref AWSLayer
+                DepLayer: !Ref DepLayer
+                Environment: !Ref Environment
+            Tags:
+                Environment: !Ref Environment
+
+    ApplicationResourceGroup:
+        Type: AWS::ResourceGroups::Group
+        Properties:
+            Name: serverless-placeholder
+            ResourceQuery:
+                Type: CLOUDFORMATION_STACK_1_0
+
+    ApplicationInsightsMonitoring:
+        Type: AWS::ApplicationInsights::Application
+        Properties:
+            ResourceGroupName:
+                Ref: ApplicationResourceGroup
+            AutoConfigurationEnabled: true
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: Hello World Lambda Function ARN
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+    ObjectApi:
+        Description: Object API endpoint URL
+        Value: !GetAtt ObjectStack.Outputs.ObjectApi
+    UserApi:
+        Description: User API endpoint URL
+        Value: !GetAtt UserStack.Outputs.UserApi
