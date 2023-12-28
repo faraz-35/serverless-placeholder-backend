@@ -18,10 +18,19 @@ Resources:
             AttributeDefinitions:
                 - AttributeName: id
                   AttributeType: S
+                - AttributeName: email
+                  AttributeType: S
             KeySchema:
                 - AttributeName: id
                   KeyType: HASH
             BillingMode: PAY_PER_REQUEST
+            GlobalSecondaryIndexes:
+                - IndexName: EmailIndex
+                  KeySchema:
+                      - AttributeName: email
+                        KeyType: HASH
+                  Projection:
+                      ProjectionType: ALL
 
     UserAdminFunction:
         Type: AWS::Serverless::Function
