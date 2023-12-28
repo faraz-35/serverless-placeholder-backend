@@ -1,0 +1,18 @@
+{
+    "name": "serverless-placeholder",
+    "version": "1.0.0",
+    "author": {
+        "name": "S M Faraz Shah",
+        "email": "farazshah2001@gmail.com"
+    },
+    "scripts": {
+        "build": "sam build",
+        "watch-build": "nodemon --exec 'sam build' --watch .  -e js,ts,json,yaml --delay 100ms --quiet",
+        "start-api": "sam local start-api",
+        "deploy": "sam deploy --guided",
+        "dev": "npm run watch-build & ./setup-dynamodb-local.sh && npm run start-api"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    }
+}

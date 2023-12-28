@@ -1,0 +1,28 @@
+import { APIGatewayProxyEvent } from 'aws-lambda';
+
+import { changePassword } from './ChangeUserPassword';
+import { deleteUser, getUser, updateUser } from './crudFunctions';
+import { APIResponse } from '../types/globals';
+
+export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+    const { path, httpMethod } = event;
+    switch (httpMethod) {
+        case 'GET':
+            return getUser(event);
+        case 'PUT':
+            if (path === '/users-management/updateUser') {
+                return updateUser(event);
+            } else if (path === '/users-management/changePassword') {
+                return changePassword(event);
+            }
+        case 'DELETE':
+            return deleteUser(event);
+        default:
+            return {
+                statusCode: 404,
+                body: {
+                    error: 'Invalid endpoint',
+                },
+            };
+    }
+};
