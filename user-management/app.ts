@@ -1,10 +1,10 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { changePassword } from './ChangeUserPassword';
 import { deleteUser, getUser, updateUser } from './crudFunctions';
 import { APIResponse } from '../types/globals';
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const { path, httpMethod } = event;
     switch (httpMethod) {
         case 'GET':
@@ -20,9 +20,9 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIRes
         default:
             return {
                 statusCode: 404,
-                body: {
+                body: JSON.stringify({
                     error: 'Invalid endpoint',
-                },
+                } as APIResponse),
             };
     }
 };

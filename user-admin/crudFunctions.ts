@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -9,7 +9,7 @@ const dbClient = new DocumentClient({
     endpoint: 'http://host.docker.internal:8000',
 });
 
-export const createUser = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const { username, firstName, lastName, email, password, imageUrl }: CreateUserInput = JSON.parse(
             event.body || '',
@@ -20,7 +20,7 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
         if (!username || !firstName || !email || !password) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -40,20 +40,19 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
 
         return {
             statusCode: 201,
-            body: { message: 'User created successfully' },
+            body: JSON.stringify({ message: 'User created successfully' } as APIResponse),
         };
     } catch (error: any) {
         console.info({ error });
         return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: error.message,
-            },
+            } as APIResponse),
         };
     }
 };
-export const getUser = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
-    let response: APIResponse;
+export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
         if (id) {
@@ -67,11 +66,11 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIResponse>
             const result = await dbClient.get(params).promise();
             const item = result.Item;
 
-            response = {
+            return {
                 statusCode: 200,
-                body: {
-                    data: JSON.stringify(item as User),
-                },
+                body: JSON.stringify({
+                    data: item as User,
+                } as APIResponse),
             };
         } else {
             const params: DocumentClient.ScanInput = {
@@ -81,25 +80,25 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIResponse>
             const result = await dbClient.scan(params).promise();
             const items = result.Items;
 
-            response = {
+            return {
                 statusCode: 200,
-                body: {
-                    data: JSON.stringify(items as User[]),
-                },
+                body: JSON.stringify({
+                    data: items as User[],
+                } as APIResponse),
             };
         }
     } catch (error: any) {
-        response = {
+        console.info({ error });
+        return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: error.message,
-            },
+            } as APIResponse),
         };
     }
-    return response;
 };
 
-export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
         const { firstName, lastName, username } = JSON.parse(event.body || '');
@@ -108,7 +107,7 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
         if (!username || !firstName || !lastName || !id) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -125,22 +124,23 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
 
         return {
             statusCode: 200,
-            body: {
-                data: JSON.stringify(Attributes),
-                message: JSON.stringify('User updated successfully'),
-            },
+            body: JSON.stringify({
+                data: Attributes,
+                message: 'User updated successfully',
+            } as APIResponse),
         };
     } catch (error: any) {
+        console.info({ error });
         return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: JSON.stringify(error.message),
-            },
+            } as APIResponse),
         };
     }
 };
 
-export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
 
@@ -148,7 +148,7 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
         if (!id) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -161,16 +161,16 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
 
         return {
             statusCode: 200,
-            body: {
+            body: JSON.stringify({
                 message: 'User deleted successfully',
-            },
+            } as APIResponse),
         };
     } catch (error) {
         return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: 'Failed to delete user',
-            },
+            } as APIResponse),
         };
     }
 };

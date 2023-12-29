@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -19,8 +19,7 @@ const dbClient = new DocumentClient({
  *
  */
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
-    let response: APIResponse;
+export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const { email, password }: UserSignupInput = JSON.parse(event.body || '');
 
@@ -28,7 +27,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIRes
         if (!email || !password) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -42,19 +41,19 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIRes
         };
 
         await dbClient.put(params).promise();
-        response = {
+        return {
             statusCode: 200,
-            body: {
+            body: JSON.stringify({
                 message: 'User registered successfully',
-            },
+            } as APIResponse),
         };
     } catch (error: any) {
-        response = {
+        console.info({ error });
+        return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: error.message,
-            },
+            } as APIResponse),
         };
     }
-    return response;
 };
