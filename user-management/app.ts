@@ -10,9 +10,9 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         case 'GET':
             return getUser(event);
         case 'PUT':
-            if (path === '/users-management/updateUser') {
+            if (path === '/user-management/updateUser') {
                 return updateUser(event);
-            } else if (path === '/users-management/changePassword') {
+            } else if (path === '/user-management/changePassword') {
                 return changePassword(event);
             }
         case 'DELETE':
