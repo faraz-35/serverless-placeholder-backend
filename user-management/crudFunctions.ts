@@ -1,5 +1,6 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+
 import { APIResponse } from '../types/globals';
 import { UpdateUserInput } from '../types/user';
 
@@ -7,7 +8,7 @@ const dbClient = new DocumentClient({
     endpoint: 'http://host.docker.internal:8000',
 });
 
-export const getUser = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id || '';
 
@@ -15,7 +16,7 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         if (!id) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -29,21 +30,22 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
         return {
             statusCode: 200,
-            body: {
-                data: JSON.stringify(item),
-            },
+            body: JSON.stringify({
+                data: item,
+            } as APIResponse),
         };
     } catch (error: any) {
+        console.info({ error });
         return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: error.message,
-            },
+            } as APIResponse),
         };
     }
 };
 
-export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id || '';
         const { username, firstName, lastName, imageUrl }: UpdateUserInput = JSON.parse(event.body || '');
@@ -52,7 +54,7 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
         if (!id || !username || !firstName || !lastName) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -72,21 +74,22 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
 
         return {
             statusCode: 200,
-            body: {
-                data: 'User details updated successfully',
-            },
+            body: JSON.stringify({
+                message: 'User details updated successfully',
+            } as APIResponse),
         };
     } catch (error: any) {
+        console.info({ error });
         return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: error.message,
-            },
+            } as APIResponse),
         };
     }
 };
 
-export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
 
@@ -94,7 +97,7 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
         if (!id) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -107,16 +110,17 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIRespon
 
         return {
             statusCode: 200,
-            body: {
+            body: JSON.stringify({
                 data: 'Account deleted successfully',
-            },
+            } as APIResponse),
         };
     } catch (error: any) {
+        console.info({ error });
         return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: error.message,
-            },
+            } as APIResponse),
         };
     }
 };

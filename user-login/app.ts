@@ -1,7 +1,8 @@
-import { APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
-import { APIResponse } from '../types/globals';
+
 import { UserLoginInput } from '../types/user';
+import { APIResponse } from '../types/globals';
 
 const dbClient = new DocumentClient({
     endpoint: 'http://host.docker.internal:8000',
@@ -17,8 +18,7 @@ const dbClient = new DocumentClient({
  *
  */
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
-    let response: APIResponse;
+export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const { email, password }: UserLoginInput = JSON.parse(event.body || '');
 
@@ -26,7 +26,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIRes
         if (!email || !password) {
             return {
                 statusCode: 400,
-                body: { error: 'Missing required fields' },
+                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
             };
         }
 
@@ -46,27 +46,27 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIRes
         const user = result.Items ? result.Items[0] : null;
 
         if (!user || user.password !== password) {
-            response = {
+            return {
                 statusCode: 401,
-                body: {
+                body: JSON.stringify({
                     error: 'Invalid email or password',
-                },
+                } as APIResponse),
             };
         } else {
-            response = {
+            return {
                 statusCode: 200,
-                body: {
+                body: JSON.stringify({
                     message: 'User logged in successfully',
-                },
+                } as APIResponse),
             };
         }
     } catch (error: any) {
-        response = {
+        console.info({ error });
+        return {
             statusCode: 500,
-            body: {
+            body: JSON.stringify({
                 error: error.message,
-            },
+            } as APIResponse),
         };
     }
-    return response;
 };
