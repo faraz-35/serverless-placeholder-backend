@@ -53,10 +53,14 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
                 } as APIResponse),
             };
         } else {
+            delete user.password;
             return {
                 statusCode: 200,
                 body: JSON.stringify({
                     message: 'User logged in successfully',
+                    data: {
+                        user,
+                    },
                 } as APIResponse),
             };
         }

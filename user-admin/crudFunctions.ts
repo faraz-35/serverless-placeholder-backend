@@ -16,7 +16,6 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         );
 
         // Input validation
-
         if (!username || !firstName || !email || !password) {
             return {
                 statusCode: 400,
@@ -24,23 +23,32 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
             };
         }
 
+        const user: User = {
+            id: uuidv4(),
+            username,
+            email,
+            password,
+            firstName,
+            lastName,
+            imageUrl,
+        };
         const params: DocumentClient.PutItemInput = {
             TableName: 'UserTable',
             Item: {
-                id: uuidv4(),
-                username,
-                email,
-                password,
-                firstName,
-                lastName,
-                imageUrl,
+                ...user,
             },
         };
         await dbClient.put(params).promise();
 
+        delete (user as any).password;
         return {
             statusCode: 201,
-            body: JSON.stringify({ message: 'User created successfully' } as APIResponse),
+            body: JSON.stringify({
+                message: 'User created successfully',
+                data: {
+                    user,
+                },
+            } as APIResponse),
         };
     } catch (error: any) {
         console.info({ error });
