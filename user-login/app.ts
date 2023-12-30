@@ -32,7 +32,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
 
         const params: DocumentClient.QueryInput = {
             TableName: 'UserTable',
-            IndexName: 'email',
+            IndexName: 'EmailIndex',
             KeyConditionExpression: '#email = :email',
             ExpressionAttributeNames: {
                 '#email': 'email',
