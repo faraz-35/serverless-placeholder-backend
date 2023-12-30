@@ -31,10 +31,11 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             };
         }
 
+        const id = uuidv4();
         const params: DocumentClient.PutItemInput = {
             TableName: 'UserTable',
             Item: {
-                id: uuidv4(),
+                id,
                 email,
                 password,
             },
@@ -45,6 +46,10 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             statusCode: 200,
             body: JSON.stringify({
                 message: 'User registered successfully',
+                data: {
+                    id,
+                    email,
+                },
             } as APIResponse),
         };
     } catch (error: any) {
