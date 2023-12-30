@@ -55,6 +55,8 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
 export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
+        const limit = event.queryStringParameters?.limit;
+        const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
         if (id) {
             const params: DocumentClient.GetItemInput = {
                 TableName: 'UserTable',
@@ -75,15 +77,18 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         } else {
             const params: DocumentClient.ScanInput = {
                 TableName: 'UserTable',
+                Limit: limit ? parseInt(limit) : undefined,
+                ExclusiveStartKey: exclusiveStartKey ? JSON.parse(decodeURIComponent(exclusiveStartKey)) : undefined,
             };
 
             const result = await dbClient.scan(params).promise();
             const items = result.Items;
+            const lastEvaluatedKey = result.LastEvaluatedKey;
 
             return {
                 statusCode: 200,
                 body: JSON.stringify({
-                    data: items as User[],
+                    data: { items: items as User[], lastEvaluatedKey },
                 } as APIResponse),
             };
         }
