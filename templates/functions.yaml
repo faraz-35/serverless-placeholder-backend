@@ -9,8 +9,22 @@ Globals:
         Environment:
             Variables:
                 USER_TABLE: !Ref UserTable
+        Layers:
+            - !Ref DepLayer
 
 Resources:
+
+    DepLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            LayerName: dependencies
+            Description: Dependencies for placeholder app
+            ContentUri: ../dependencies/
+            CompatibleRuntimes:
+            - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Retain
+    
     UserTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -46,6 +60,10 @@ Resources:
                 Target: es2020
                 EntryPoints:
                     - app.ts
+                External:
+                    - aws-sdk
+                    - bcryptjs
+                    - uuid
 
     UserManagementFunction:
         Type: AWS::Serverless::Function
@@ -61,6 +79,10 @@ Resources:
                 Target: es2020
                 EntryPoints:
                     - app.ts
+                External:
+                    - aws-sdk
+                    - bcryptjs
+                    - uuid
 
     UserLoginFunction:
         Type: AWS::Serverless::Function
@@ -76,6 +98,10 @@ Resources:
                 Target: es2020
                 EntryPoints:
                     - app.ts
+                External:
+                    - aws-sdk
+                    - bcryptjs
+                    - uuid
 
     UserSignupFunction:
         Type: AWS::Serverless::Function
@@ -91,3 +117,7 @@ Resources:
                 Target: es2020
                 EntryPoints:
                     - app.ts
+                External:
+                    - aws-sdk
+                    - bcryptjs
+                    - uuid
