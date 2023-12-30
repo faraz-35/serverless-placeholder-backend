@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 import { APIResponse } from '../types/globals';
 import { CreateUserInput, User } from '../types/user';
@@ -19,15 +20,18 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         if (!username || !firstName || !email || !password) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
+                body: JSON.stringify({
+                    error: 'Missing required fields',
+                } as APIResponse),
             };
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user: User = {
             id: uuidv4(),
             username,
             email,
-            password,
+            password: hashedPassword,
             firstName,
             lastName,
             imageUrl,
@@ -120,7 +124,9 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         if (!username || !firstName || !lastName || !id) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
+                body: JSON.stringify({
+                    error: 'Missing required fields',
+                } as APIResponse),
             };
         }
 
@@ -128,8 +134,16 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
             TableName: 'UserTable',
             Key: { id },
             UpdateExpression: 'set #firstName = :firstName, #lastName = :lastName, #username = :username',
-            ExpressionAttributeNames: { '#firstName': 'firstName', '#lastName': 'lastName', '#username': 'username' },
-            ExpressionAttributeValues: { ':firstName': firstName, ':lastName': lastName, ':username': username },
+            ExpressionAttributeNames: {
+                '#firstName': 'firstName',
+                '#lastName': 'lastName',
+                '#username': 'username',
+            },
+            ExpressionAttributeValues: {
+                ':firstName': firstName,
+                ':lastName': lastName,
+                ':username': username,
+            },
             ReturnValues: 'UPDATED_NEW',
         };
 
@@ -161,7 +175,9 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         if (!id) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
+                body: JSON.stringify({
+                    error: 'Missing required fields',
+                } as APIResponse),
             };
         }
 

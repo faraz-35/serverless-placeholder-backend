@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+import bcrypt from 'bcryptjs';
 
 import { UserLoginInput } from '../types/user';
 import { APIResponse } from '../types/globals';
@@ -26,7 +27,9 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         if (!email || !password) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Missing required fields' } as APIResponse),
+                body: JSON.stringify({
+                    error: 'Missing required fields',
+                } as APIResponse),
             };
         }
 
@@ -45,11 +48,20 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         const result = await dbClient.query(params).promise();
         const user = result.Items ? result.Items[0] : null;
 
-        if (!user || user.password !== password) {
+        if (!user) {
             return {
                 statusCode: 401,
                 body: JSON.stringify({
-                    error: 'Invalid email or password',
+                    error: 'Invalid email',
+                } as APIResponse),
+            };
+        }
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+            return {
+                statusCode: 401,
+                body: JSON.stringify({
+                    error: 'Invalid password',
                 } as APIResponse),
             };
         } else {
