@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 import { APIResponse } from '../types/globals';
 import { UserSignupInput } from '../types/user';
@@ -32,12 +33,13 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         }
 
         const id = uuidv4();
+        const hashedPassword = await bcrypt.hash(password, 10);
         const params: DocumentClient.PutItemInput = {
             TableName: 'UserTable',
             Item: {
                 id,
                 email,
-                password,
+                password: hashedPassword,
             },
         };
 
