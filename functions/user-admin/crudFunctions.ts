@@ -3,8 +3,8 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 
-import { APIResponse } from '../types/globals';
-import { CreateUserInput, User } from '../types/user';
+import { APIResponse } from '../../types/globals';
+import { CreateUserInput, User } from '../../types/user';
 
 const dbClient = new DocumentClient({
     endpoint: 'http://host.docker.internal:8000',
