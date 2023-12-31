@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { createUser, deleteUser, getUser, updateUser } from './crudFunctions';
-import { APIResponse } from '../types/globals';
+import { APIResponse } from '../../types/globals';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     switch (event.httpMethod) {

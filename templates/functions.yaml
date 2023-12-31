@@ -49,7 +49,7 @@ Resources:
     UserAdminFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../user-admin/
+            CodeUri: ../functions/user-admin/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
@@ -68,7 +68,7 @@ Resources:
     UserManagementFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../user-management/
+            CodeUri: ../functions/user-management/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
@@ -87,7 +87,7 @@ Resources:
     UserLoginFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../user-login/
+            CodeUri: ../functions/user-login/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
@@ -106,7 +106,7 @@ Resources:
     UserSignupFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../user-signup/
+            CodeUri: ../functions/user-signup/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
