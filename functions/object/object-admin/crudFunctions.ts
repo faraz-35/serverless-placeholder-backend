@@ -1,23 +1,20 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import bcrypt from 'bcryptjs';
 
-import { APIResponse } from '../../types/globals';
-import { CreateUserInput, User } from '../../types/user';
+import { APIResponse } from '../../../types/globals';
+import { CreateObjectInput, TObject, UpdateObjectInput } from '../../../types/object';
 
 const dbClient = new DocumentClient({
     endpoint: 'http://host.docker.internal:8000',
 });
 
-export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const createObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        const { username, firstName, lastName, email, password, imageUrl }: CreateUserInput = JSON.parse(
-            event.body || '',
-        );
+        const { name }: CreateObjectInput = JSON.parse(event.body || '');
 
         // Input validation
-        if (!username || !firstName || !email || !password) {
+        if (!name) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({
@@ -26,31 +23,24 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
             };
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const user: User = {
+        const object: TObject = {
             id: uuidv4(),
-            username,
-            email,
-            password: hashedPassword,
-            firstName,
-            lastName,
-            imageUrl,
+            name,
         };
         const params: DocumentClient.PutItemInput = {
-            TableName: 'UserTable',
+            TableName: 'ObjectTable',
             Item: {
-                ...user,
+                ...object,
             },
         };
         await dbClient.put(params).promise();
 
-        delete (user as any).password;
         return {
             statusCode: 201,
             body: JSON.stringify({
-                message: 'User created successfully',
+                message: 'Object created successfully',
                 data: {
-                    user,
+                    object,
                 },
             } as APIResponse),
         };
@@ -64,14 +54,14 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         };
     }
 };
-export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
         const limit = event.queryStringParameters?.limit;
         const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
         if (id) {
             const params: DocumentClient.GetItemInput = {
-                TableName: 'UserTable',
+                TableName: 'ObjectTable',
                 Key: {
                     id,
                 },
@@ -83,12 +73,12 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return {
                 statusCode: 200,
                 body: JSON.stringify({
-                    data: item as User,
+                    data: item as TObject,
                 } as APIResponse),
             };
         } else {
             const params: DocumentClient.ScanInput = {
-                TableName: 'UserTable',
+                TableName: 'ObjectTable',
                 Limit: limit ? parseInt(limit) : undefined,
                 ExclusiveStartKey: exclusiveStartKey ? JSON.parse(decodeURIComponent(exclusiveStartKey)) : undefined,
             };
@@ -100,7 +90,7 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return {
                 statusCode: 200,
                 body: JSON.stringify({
-                    data: { items: items as User[], lastEvaluatedKey },
+                    data: { items: items as TObject[], lastEvaluatedKey },
                 } as APIResponse),
             };
         }
@@ -115,13 +105,12 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     }
 };
 
-export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const updateObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
-        const { firstName, lastName, username } = JSON.parse(event.body || '');
+        const { name }: UpdateObjectInput = JSON.parse(event.body || '');
 
-        // Input validation
-        if (!username || !firstName || !lastName || !id) {
+        if (!name || !id) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({
@@ -131,18 +120,14 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         }
 
         const params: DocumentClient.UpdateItemInput = {
-            TableName: 'UserTable',
+            TableName: 'ObjectTable',
             Key: { id },
-            UpdateExpression: 'set #firstName = :firstName, #lastName = :lastName, #username = :username',
+            UpdateExpression: 'set #name = :name',
             ExpressionAttributeNames: {
-                '#firstName': 'firstName',
-                '#lastName': 'lastName',
-                '#username': 'username',
+                '#name': 'name',
             },
             ExpressionAttributeValues: {
-                ':firstName': firstName,
-                ':lastName': lastName,
-                ':username': username,
+                ':name': name,
             },
             ReturnValues: 'UPDATED_NEW',
         };
@@ -153,7 +138,7 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
             statusCode: 200,
             body: JSON.stringify({
                 data: Attributes,
-                message: 'User updated successfully',
+                message: 'Object updated successfully',
             } as APIResponse),
         };
     } catch (error: any) {
@@ -167,7 +152,7 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
     }
 };
 
-export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const deleteObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
 
@@ -182,7 +167,7 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         }
 
         const params: DocumentClient.DeleteItemInput = {
-            TableName: 'UserTable',
+            TableName: 'ObjectTable',
             Key: { id },
         };
 
@@ -191,14 +176,14 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
         return {
             statusCode: 200,
             body: JSON.stringify({
-                message: 'User deleted successfully',
+                message: 'Object deleted successfully',
             } as APIResponse),
         };
     } catch (error) {
         return {
             statusCode: 500,
             body: JSON.stringify({
-                error: 'Failed to delete user',
+                error: 'Failed to delete object',
             } as APIResponse),
         };
     }

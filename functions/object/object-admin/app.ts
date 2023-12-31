@@ -1,18 +1,18 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { createUser, deleteUser, getUser, updateUser } from './crudFunctions';
-import { APIResponse } from '../../types/globals';
+import { createObject, deleteObject, getObject, updateObject } from './crudFunctions';
+import { APIResponse } from '../../../types/globals';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     switch (event.httpMethod) {
         case 'POST':
-            return createUser(event);
+            return createObject(event);
         case 'GET':
-            return getUser(event);
+            return getObject(event);
         case 'PUT':
-            return updateUser(event);
+            return updateObject(event);
         case 'DELETE':
-            return deleteUser(event);
+            return deleteObject(event);
         default:
             return {
                 statusCode: 400,

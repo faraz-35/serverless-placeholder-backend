@@ -13,18 +13,17 @@ Globals:
             - !Ref DepLayer
 
 Resources:
-
     DepLayer:
         Type: AWS::Serverless::LayerVersion
         Properties:
             LayerName: dependencies
             Description: Dependencies for placeholder app
-            ContentUri: ../dependencies/
+            ContentUri: ../../dependencies/
             CompatibleRuntimes:
-            - nodejs14.x
+                - nodejs14.x
             LicenseInfo: 'MIT'
             RetentionPolicy: Retain
-    
+
     UserTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -49,7 +48,7 @@ Resources:
     UserAdminFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../functions/user-admin/
+            CodeUri: ../../functions/user/user-admin/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
@@ -68,7 +67,7 @@ Resources:
     UserManagementFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../functions/user-management/
+            CodeUri: ../../functions/user/user-management/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
@@ -87,7 +86,7 @@ Resources:
     UserLoginFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../functions/user-login/
+            CodeUri: ../../functions/user/user-login/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
@@ -106,7 +105,7 @@ Resources:
     UserSignupFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../functions/user-signup/
+            CodeUri: ../../functions/user/user-signup/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable

@@ -13,6 +13,7 @@ export interface UserSignupInput {
     password: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserLoginInput extends UserSignupInput {}
 
 export interface ChangeUserPasswordInput {
