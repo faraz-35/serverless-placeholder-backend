@@ -2,8 +2,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import bcrypt from 'bcryptjs';
 
-import { UserLoginInput } from '../../types/user';
-import { APIResponse } from '../../types/globals';
+import { UserLoginInput } from '../../../types/user';
+import { APIResponse } from '../../../types/globals';
 
 const dbClient = new DocumentClient({
     endpoint: 'http://host.docker.internal:8000',

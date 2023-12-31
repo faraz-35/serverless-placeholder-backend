@@ -6,15 +6,26 @@ Description: >
     Sample SAM Template for serverless-placeholder
 
 Resources:
-    ApiStack:
+    UserApiStack:
         Type: AWS::CloudFormation::Stack
         Properties:
-            TemplateURL: ./templates/api.yaml
+            TemplateURL: ./templates/api/user-api.yaml
 
-    FunctionsStack:
+    ObjectApiStack:
         Type: AWS::CloudFormation::Stack
         Properties:
-            TemplateURL: ./templates/functions.yaml
+            TemplateURL: ./templates/api/object-api.yaml
+
+    UserFunctionStack:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: ./templates/function/user-function.yaml
+
+    ObjectFunctionStack:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: ./templates/function/object-function.yaml
+
     # ApplicationResourceGroup:
     #     Type: AWS::ResourceGroups::Group
     #     Properties:

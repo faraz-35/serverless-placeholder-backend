@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { changePassword } from './ChangeUserPassword';
 import { deleteUser, getUser, updateUser } from './crudFunctions';
-import { APIResponse } from '../../types/globals';
+import { APIResponse } from '../../../types/globals';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const { path, httpMethod } = event;
