@@ -9,20 +9,31 @@ Globals:
         Environment:
             Variables:
                 USER_TABLE: !Ref UserTable
-        Layers:
-            - !Ref DepLayer
+        # Layers:
+        #     - !Ref DepLayer
+        #     - !Ref AWSLayer
 
 Resources:
-    DepLayer:
-        Type: AWS::Serverless::LayerVersion
-        Properties:
-            LayerName: dependencies
-            Description: Dependencies for placeholder app
-            ContentUri: ../../dependencies/
-            CompatibleRuntimes:
-                - nodejs14.x
-            LicenseInfo: 'MIT'
-            RetentionPolicy: Retain
+    # DepLayer:
+    #     Type: AWS::Serverless::LayerVersion
+    #     Properties:
+    #         LayerName: dependencies
+    #         Description: Dependencies for placeholder app
+    #         ContentUri: ../../layers/dependencies/
+    #         CompatibleRuntimes:
+    #             - nodejs14.x
+    #         LicenseInfo: 'MIT'
+    #         RetentionPolicy: Delete
+    # AWSLayer:
+    #     Type: AWS::Serverless::LayerVersion
+    #     Properties:
+    #         LayerName: aws layer
+    #         Description: AWS Dependencies for placeholder app
+    #         ContentUri: ../../layers/aws/
+    #         CompatibleRuntimes:
+    #             - nodejs14.x
+    #         LicenseInfo: 'MIT'
+    #         RetentionPolicy: Delete
 
     UserTable:
         Type: AWS::DynamoDB::Table
@@ -45,78 +56,97 @@ Resources:
                   Projection:
                       ProjectionType: ALL
 
-    UserAdminFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: ../../functions/user/user-admin/
-            Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref UserTable
-        Metadata:
-            BuildMethod: esbuild
-            BuildProperties:
-                Minify: true
-                Target: es2020
-                EntryPoints:
-                    - app.ts
-                External:
-                    - aws-sdk
-                    - bcryptjs
-                    - uuid
+    # UserAdminFunction:
+    #     Type: AWS::Serverless::Function
+    #     Properties:
+    #         CodeUri: ../../functions/user/user-admin/
+    #         Policies:
+    #             - DynamoDBCrudPolicy:
+    #                   TableName: !Ref UserTable
+    #     Metadata:
+    #         BuildMethod: esbuild
+    #         BuildProperties:
+    #             Minify: true
+    #             Target: es2020
+    #             EntryPoints:
+    #                 - app.ts
+    #             External:
+    #                 - aws-sdk
+    #                 - bcryptjs
+    #                 - uuid
 
-    UserManagementFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: ../../functions/user/user-management/
-            Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref UserTable
-        Metadata:
-            BuildMethod: esbuild
-            BuildProperties:
-                Minify: true
-                Target: es2020
-                EntryPoints:
-                    - app.ts
-                External:
-                    - aws-sdk
-                    - bcryptjs
-                    - uuid
+    # UserManagementFunction:
+    #     Type: AWS::Serverless::Function
+    #     Properties:
+    #         CodeUri: ../../functions/user/user-management/
+    #         Policies:
+    #             - DynamoDBCrudPolicy:
+    #                   TableName: !Ref UserTable
+    #     Metadata:
+    #         BuildMethod: esbuild
+    #         BuildProperties:
+    #             Minify: true
+    #             Target: es2020
+    #             EntryPoints:
+    #                 - app.ts
+    #             External:
+    #                 - aws-sdk
+    #                 - bcryptjs
+    #                 - uuid
 
-    UserLoginFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: ../../functions/user/user-login/
-            Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref UserTable
-        Metadata:
-            BuildMethod: esbuild
-            BuildProperties:
-                Minify: true
-                Target: es2020
-                EntryPoints:
-                    - app.ts
-                External:
-                    - aws-sdk
-                    - bcryptjs
-                    - uuid
+    # UserObjectFunction:
+    #     Type: AWS::Serverless::Function
+    #     Properties:
+    #         CodeUri: ../../functions/user/user-object/
+    #         Policies:
+    #             - DynamoDBCrudPolicy:
+    #                   TableName: !Ref UserTable
+    #         Layers:
+    #             - !Ref AWSLayer
+    #     Metadata:
+    #         BuildMethod: esbuild
+    #         BuildProperties:
+    #             Minify: true
+    #             Target: es2020
+    #             EntryPoints:
+    #                 - app.ts
+    #             External:
+    #                 - aws-sdk
 
-    UserSignupFunction:
-        Type: AWS::Serverless::Function
-        Properties:
-            CodeUri: ../../functions/user/user-signup/
-            Policies:
-                - DynamoDBCrudPolicy:
-                      TableName: !Ref UserTable
-        Metadata:
-            BuildMethod: esbuild
-            BuildProperties:
-                Minify: true
-                Target: es2020
-                EntryPoints:
-                    - app.ts
-                External:
-                    - aws-sdk
-                    - bcryptjs
-                    - uuid
+    # UserLoginFunction:
+    #     Type: AWS::Serverless::Function
+    #     Properties:
+    #         CodeUri: ../../functions/user/user-login/
+    #         Policies:
+    #             - DynamoDBCrudPolicy:
+    #                   TableName: !Ref UserTable
+    #     Metadata:
+    #         BuildMethod: esbuild
+    #         BuildProperties:
+    #             Minify: true
+    #             Target: es2020
+    #             EntryPoints:
+    #                 - app.ts
+    #             External:
+    #                 - aws-sdk
+    #                 - bcryptjs
+    #                 - uuid
+
+    # UserSignupFunction:
+    #     Type: AWS::Serverless::Function
+    #     Properties:
+    #         CodeUri: ../../functions/user/user-signup/
+    #         Policies:
+    #             - DynamoDBCrudPolicy:
+    #                   TableName: !Ref UserTable
+    #     Metadata:
+    #         BuildMethod: esbuild
+    #         BuildProperties:
+    #             Minify: true
+    #             Target: es2020
+    #             EntryPoints:
+    #                 - app.ts
+    #             External:
+    #                 - aws-sdk
+    #                 - bcryptjs
+    #                 - uuid

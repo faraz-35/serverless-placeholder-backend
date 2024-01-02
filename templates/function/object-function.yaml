@@ -1,3 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    serverless-placeholder object function stack
+
+    Sample SAM Template for serverless-placeholder
+
+Parameters:
+    AWSLayer:
+        Type: String
+        Description: The ARN of the AWSLayer
+    DepLayer:
+        Type: String
+        Description: The ARN of the DepLayer
+
 Globals:
     Function:
         Timeout: 3
@@ -10,20 +25,10 @@ Globals:
             Variables:
                 OBJECT_TABLE: !Ref ObjectTable
         Layers:
+            - !Ref AWSLayer
             - !Ref DepLayer
 
 Resources:
-    DepLayer:
-        Type: AWS::Serverless::LayerVersion
-        Properties:
-            LayerName: dependencies
-            Description: Dependencies for placeholder app
-            ContentUri: ../../dependencies/
-            CompatibleRuntimes:
-                - nodejs14.x
-            LicenseInfo: 'MIT'
-            RetentionPolicy: Retain
-
     ObjectTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -51,5 +56,10 @@ Resources:
                 EntryPoints:
                     - app.ts
                 External:
-                    - aws-sdk
                     - uuid
+                    - /opt/nodejs/dynamodb/*
+
+Outputs:
+    ObjectFunctionArn:
+        Description: The ARN of the ObjectFunction
+        Value: !GetAtt ObjectAdminFunction.Arn

@@ -13,6 +13,8 @@ Resources:
                     type: 'aws_proxy'
                 managment-uri: &managment-uri
                     Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UserManagementFunction.Arn}/invocations
+                objectManagment-uri: &objectManagment-uri
+                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UserObjectFunction.Arn}/invocations
                 paths:
                     /user-signup:
                         post:
@@ -56,3 +58,21 @@ Resources:
                             x-amazon-apigateway-integration:
                                 <<: *common-integration
                                 uri: *managment-uri
+
+                    /user-object:
+                        get:
+                            x-amazon-apigateway-integration:
+                                <<: *common-integration
+                                uri: *objectManagment-uri
+
+                    /user-object/addObject:
+                        put:
+                            x-amazon-apigateway-integration:
+                                <<: *common-integration
+                                uri: *objectManagment-uri
+
+                    /user-object/removeObject:
+                        put:
+                            x-amazon-apigateway-integration:
+                                <<: *common-integration
+                                uri: *objectManagment-uri

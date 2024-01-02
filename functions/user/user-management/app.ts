@@ -1,28 +1,24 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-import { changePassword } from './ChangeUserPassword';
-import { deleteUser, getUser, updateUser } from './crudFunctions';
-import { APIResponse } from '../../../types/globals';
+import { deleteUser, getUser, updateUser, changePassword } from './userManagment';
+import { INVALID_ENDPOINT } from '/opt/nodejs/dynamodb/apiResponses';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const { path, httpMethod } = event;
-    switch (httpMethod) {
-        case 'GET':
-            return getUser(event);
-        case 'PUT':
-            if (path === '/user-management/updateUser') {
-                return updateUser(event);
-            } else if (path === '/user-management/changePassword') {
-                return changePassword(event);
+    switch (path) {
+        case '/user-management/changePassword':
+            return changePassword(event);
+        case '/user-management/updateUser':
+            return updateUser(event);
+        case '/user-management':
+            if (httpMethod === 'GET') {
+                return getUser(event);
+            } else if (httpMethod === 'DELETE') {
+                return deleteUser(event);
+            } else {
+                return INVALID_ENDPOINT;
             }
-        case 'DELETE':
-            return deleteUser(event);
         default:
-            return {
-                statusCode: 404,
-                body: JSON.stringify({
-                    error: 'Invalid endpoint',
-                } as APIResponse),
-            };
+            return INVALID_ENDPOINT;
     }
 };

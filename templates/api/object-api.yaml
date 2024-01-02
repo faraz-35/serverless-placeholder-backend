@@ -1,3 +1,14 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    serverless-placeholder object api stack
+
+    Sample SAM Template for serverless-placeholder
+Parameters:
+    ObjectAdminFunctionArn:
+        Type: String
+        Description: The ARN of the ObjectFunction
+        Default: 'arn:aws:lambda:${AWS::Region}:386499858012:function:ObjectAdminFunction'
 Resources:
     ObjectApi:
         Type: AWS::Serverless::Api
@@ -5,7 +16,8 @@ Resources:
             StageName: Dev
             DefinitionBody:
                 swagger: '2.0'
-                info: title:Object API
+                info:
+                    title: Object API
                 common-integration: &common-integration
                     passthroughBehavior: 'when_no_match'
                     httpMethod: 'POST'
@@ -16,4 +28,9 @@ Resources:
                             x-amazon-apigateway-integration:
                                 <<: *common-integration
                                 uri:
-                                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ObjectAdminFunction.Arn}/invocations
+                                    Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ObjectAdminFunctionArn}/invocations
+
+Outputs:
+    ApiURL:
+        Description: 'API Gateway endpoint URL for Prod stage'
+        Value: !Sub 'https://${ObjectApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/'

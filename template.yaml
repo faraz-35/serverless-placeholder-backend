@@ -6,25 +6,49 @@ Description: >
     Sample SAM Template for serverless-placeholder
 
 Resources:
-    UserApiStack:
-        Type: AWS::CloudFormation::Stack
+    DepLayer:
+        Type: AWS::Serverless::LayerVersion
         Properties:
-            TemplateURL: ./templates/api/user-api.yaml
-
-    ObjectApiStack:
-        Type: AWS::CloudFormation::Stack
+            Description: Dependencies for placeholder app
+            ContentUri: './layers/dependencies/'
+            CompatibleRuntimes:
+                - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Delete
+    AWSLayer:
+        Type: AWS::Serverless::LayerVersion
         Properties:
-            TemplateURL: ./templates/api/object-api.yaml
-
-    UserFunctionStack:
-        Type: AWS::CloudFormation::Stack
-        Properties:
-            TemplateURL: ./templates/function/user-function.yaml
+            Description: AWS Dependencies for placeholder app
+            ContentUri: './layers/aws/'
+            CompatibleRuntimes:
+                - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Delete
 
     ObjectFunctionStack:
-        Type: AWS::CloudFormation::Stack
+        Type: AWS::Serverless::Application
         Properties:
-            TemplateURL: ./templates/function/object-function.yaml
+            Location: ./templates/function/object-function.yaml
+            Parameters:
+                AWSLayer: !Ref AWSLayer
+                DepLayer: !Ref DepLayer
+
+    ObjectApiStack:
+        Type: AWS::Serverless::Application
+        Properties:
+            Location: ./templates/api/object-api.yaml
+            Parameters:
+                ObjectAdminFunctionArn: !GetAtt ObjectFunctionStack.Outputs.ObjectFunctionArn
+
+    # UserApiStack:
+    #     Type: AWS::Serverless::Application
+    #     Properties:
+    #         Location: ./templates/api/user-api.yaml
+
+    # UserFunctionStack:
+    #     Type: AWS::Serverless::Application
+    #     Properties:
+    #         Location: ./templates/function/user-function.yaml
 
     # ApplicationResourceGroup:
     #     Type: AWS::ResourceGroups::Group
@@ -39,3 +63,8 @@ Resources:
     #         ResourceGroupName:
     #             Ref: ApplicationResourceGroup
     #         AutoConfigurationEnabled: true
+
+Outputs:
+    ApiURL:
+        Description: 'API Gateway endpoint URL for Prod stage'
+        Value: !GetAtt ObjectApiStack.Outputs.ApiURL
