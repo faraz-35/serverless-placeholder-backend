@@ -5,6 +5,7 @@ version = 0.1
 [default]
 [default.global.parameters]
 stack_name = "serverless-placeholder"
+region = "ca-central-1"
 
 [default.build.parameters]
 cached = true
@@ -14,12 +15,15 @@ parallel = true
 lint = true
 
 [default.deploy.parameters]
-capabilities = "CAPABILITY_IAM"
-confirm_changeset = true
+capabilities = "CAPABILITY_AUTO_EXPAND CAPABILITY_IAM"
+confirm_changeset = false
 resolve_s3 = true
+s3_prefix = "serverless-placeholder"
+disable_rollback = true
+image_repositories = []
 
 [default.package.parameters]
-resolve_s3 = true
+resolve_s3 = false
 
 [default.sync.parameters]
 watch = true

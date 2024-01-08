@@ -1,3 +1,17 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    serverless-placeholder user function stack
+
+    Sample SAM Template for serverless-placeholder
+
+Parameters:
+    AWSLayer:
+        Type: String
+        Description: The ARN of the AWSLayer
+    DepLayer:
+        Type: String
+        Description: The ARN of the DepLayer
 Globals:
     Function:
         Timeout: 3
@@ -11,19 +25,13 @@ Globals:
                 USER_TABLE: !Ref UserTable
         Layers:
             - !Ref DepLayer
+            - !Ref AWSLayer
 
 Resources:
-    DepLayer:
-        Type: AWS::Serverless::LayerVersion
+    UserApi:
+        Type: AWS::Serverless::Api
         Properties:
-            LayerName: dependencies
-            Description: Dependencies for placeholder app
-            ContentUri: ../../dependencies/
-            CompatibleRuntimes:
-                - nodejs14.x
-            LicenseInfo: 'MIT'
-            RetentionPolicy: Retain
-
+            StageName: Dev
     UserTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -48,10 +56,17 @@ Resources:
     UserAdminFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../../functions/user/user-admin/
+            CodeUri: ../functions/user/user-admin/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
+            Events:
+                UserAdminApi:
+                    Type: Api
+                    Properties:
+                        Path: /user-admin
+                        Method: ANY
+                        RestApiId: !Ref UserApi
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -60,17 +75,24 @@ Resources:
                 EntryPoints:
                     - app.ts
                 External:
-                    - aws-sdk
+                    - /opt/nodejs/dynamodb/*
                     - bcryptjs
                     - uuid
 
     UserManagementFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../../functions/user/user-management/
+            CodeUri: ../functions/user/user-management/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
+            Events:
+                UserManagementApi:
+                    Type: Api
+                    Properties:
+                        Path: /user-management
+                        Method: ANY
+                        RestApiId: !Ref UserApi
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -79,17 +101,48 @@ Resources:
                 EntryPoints:
                     - app.ts
                 External:
-                    - aws-sdk
+                    - /opt/nodejs/dynamodb/*
                     - bcryptjs
                     - uuid
+
+    UserObjectFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: ../functions/user/user-object/
+            Policies:
+                - DynamoDBCrudPolicy:
+                      TableName: !Ref UserTable
+            Events:
+                UserObjectApi:
+                    Type: Api
+                    Properties:
+                        Path: /user-object
+                        Method: ANY
+                        RestApiId: !Ref UserApi
+        Metadata:
+            BuildMethod: esbuild
+            BuildProperties:
+                Minify: true
+                Target: es2020
+                EntryPoints:
+                    - app.ts
+                External:
+                    - /opt/nodejs/dynamodb/*
 
     UserLoginFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../../functions/user/user-login/
+            CodeUri: ../functions/user/user-login/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
+            Events:
+                UserLoginApi:
+                    Type: Api
+                    Properties:
+                        Path: /user-login
+                        Method: POST
+                        RestApiId: !Ref UserApi
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -98,17 +151,24 @@ Resources:
                 EntryPoints:
                     - app.ts
                 External:
-                    - aws-sdk
+                    - /opt/nodejs/dynamodb/*
                     - bcryptjs
                     - uuid
 
     UserSignupFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../../functions/user/user-signup/
+            CodeUri: ../functions/user/user-signup/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref UserTable
+            Events:
+                UserSignupApi:
+                    Type: Api
+                    Properties:
+                        Path: /user-signup
+                        Method: POST
+                        RestApiId: !Ref UserApi
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -117,6 +177,6 @@ Resources:
                 EntryPoints:
                     - app.ts
                 External:
-                    - aws-sdk
+                    - /opt/nodejs/dynamodb/*
                     - bcryptjs
                     - uuid

@@ -1,7 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 import { createObject, deleteObject, getObject, updateObject } from './crudFunctions';
-import { APIResponse } from '../../../types/globals';
+import { INVALID_ENDPOINT } from '/opt/nodejs/dynamodb/apiResponses';
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     switch (event.httpMethod) {
@@ -14,11 +14,6 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         case 'DELETE':
             return deleteObject(event);
         default:
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: 'Invalid HTTP method',
-                } as APIResponse),
-            };
+            return INVALID_ENDPOINT;
     }
 };

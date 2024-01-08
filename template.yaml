@@ -6,25 +6,40 @@ Description: >
     Sample SAM Template for serverless-placeholder
 
 Resources:
-    UserApiStack:
-        Type: AWS::CloudFormation::Stack
+    DepLayer:
+        Type: AWS::Serverless::LayerVersion
         Properties:
-            TemplateURL: ./templates/api/user-api.yaml
+            Description: Dependencies for placeholder app
+            ContentUri: './layers/dependencies/'
+            CompatibleRuntimes:
+                - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Delete
+    AWSLayer:
+        Type: AWS::Serverless::LayerVersion
+        Properties:
+            Description: AWS Dependencies for placeholder app
+            ContentUri: './dist/layers/aws/'
+            CompatibleRuntimes:
+                - nodejs14.x
+            LicenseInfo: 'MIT'
+            RetentionPolicy: Delete
 
-    ObjectApiStack:
-        Type: AWS::CloudFormation::Stack
+    ObjectStack:
+        Type: AWS::Serverless::Application
         Properties:
-            TemplateURL: ./templates/api/object-api.yaml
+            Location: ./templates/object-stack.yaml
+            Parameters:
+                AWSLayer: !Ref AWSLayer
+                DepLayer: !Ref DepLayer
 
-    UserFunctionStack:
-        Type: AWS::CloudFormation::Stack
+    UserStack:
+        Type: AWS::Serverless::Application
         Properties:
-            TemplateURL: ./templates/function/user-function.yaml
-
-    ObjectFunctionStack:
-        Type: AWS::CloudFormation::Stack
-        Properties:
-            TemplateURL: ./templates/function/object-function.yaml
+            Location: ./templates/user-stack.yaml
+            Parameters:
+                AWSLayer: !Ref AWSLayer
+                DepLayer: !Ref DepLayer
 
     # ApplicationResourceGroup:
     #     Type: AWS::ResourceGroups::Group

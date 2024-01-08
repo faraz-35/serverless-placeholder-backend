@@ -1,12 +1,12 @@
-export type TObject = {
+export type ObjectType = {
     id: string;
     name: string;
 };
 
-export interface UpdateObjectInput {
+export interface IUpdateObject {
     name: string;
 }
 
-export interface CreateObjectInput {
+export interface ICreateObject {
     name: string;
 }

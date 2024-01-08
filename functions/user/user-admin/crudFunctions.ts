@@ -1,29 +1,19 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 
-import { APIResponse } from '../../../types/globals';
-import { CreateUserInput, UpdateUserInput, User } from '../../../types/user';
-
-const dbClient = new DocumentClient({
-    endpoint: 'http://host.docker.internal:8000',
-});
+import { ICreateUser, IUpdateUser, User } from '../../../types/user';
+import { deleteItem, getItem, putItem, scan, updateItem } from '/opt/nodejs/dynamodb';
+import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
+import { errorResponse, missingFieldsResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 
 export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
-        const { username, firstName, lastName, email, password, imageUrl }: CreateUserInput = JSON.parse(
-            event.body || '',
-        );
+        const { username, firstName, lastName, email, password, imageUrl }: ICreateUser = JSON.parse(event.body || '');
 
-        // Input validation
-        if (!username || !firstName || !email || !password) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: 'Missing required fields',
-                } as APIResponse),
-            };
+        const validation = validateInput({ username, firstName, email, password });
+        if (validation !== true) {
+            return missingFieldsResponse(validation);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -36,32 +26,12 @@ export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
             lastName,
             imageUrl,
         };
-        const params: DocumentClient.PutItemInput = {
-            TableName: 'UserTable',
-            Item: {
-                ...user,
-            },
-        };
-        await dbClient.put(params).promise();
+        await putItem('UserTable', user);
 
         delete (user as any).password;
-        return {
-            statusCode: 201,
-            body: JSON.stringify({
-                message: 'User created successfully',
-                data: {
-                    user,
-                },
-            } as APIResponse),
-        };
+        return successResponse('User created successfully', user);
     } catch (error: any) {
-        console.info({ error });
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: error.message,
-            } as APIResponse),
-        };
+        return errorResponse(error);
     }
 };
 export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
@@ -70,100 +40,37 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
         const limit = event.queryStringParameters?.limit;
         const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
         if (id) {
-            const params: DocumentClient.GetItemInput = {
-                TableName: 'UserTable',
-                Key: {
-                    id,
-                },
-            };
-
-            const result = await dbClient.get(params).promise();
+            const result = await getItem('UserTable', { id });
             const item = result.Item;
 
-            return {
-                statusCode: 200,
-                body: JSON.stringify({
-                    data: item as User,
-                } as APIResponse),
-            };
+            return successResponse(undefined, item);
         } else {
-            const params: DocumentClient.ScanInput = {
-                TableName: 'UserTable',
-                Limit: limit ? parseInt(limit) : undefined,
-                ExclusiveStartKey: exclusiveStartKey ? JSON.parse(decodeURIComponent(exclusiveStartKey)) : undefined,
-            };
-
-            const result = await dbClient.scan(params).promise();
+            const result = await scan('UserTable', limit, exclusiveStartKey);
             const items = result.Items;
             const lastEvaluatedKey = result.LastEvaluatedKey;
 
-            return {
-                statusCode: 200,
-                body: JSON.stringify({
-                    data: { items: items as User[], lastEvaluatedKey },
-                } as APIResponse),
-            };
+            return successResponse(undefined, { items: items as User[], lastEvaluatedKey });
         }
     } catch (error: any) {
-        console.info({ error });
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: error.message,
-            } as APIResponse),
-        };
+        return errorResponse(error);
     }
 };
 
 export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     try {
         const id = event.queryStringParameters?.id;
-        const { firstName, lastName, username }: UpdateUserInput = JSON.parse(event.body || '');
+        const { firstName, lastName, username }: IUpdateUser = JSON.parse(event.body || '');
 
-        // Input validation
-        if (!username || !firstName || !lastName || !id) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: 'Missing required fields',
-                } as APIResponse),
-            };
+        const validation = validateInput({ firstName, lastName, username, id });
+        if (validation !== true) {
+            return missingFieldsResponse(validation);
         }
 
-        const params: DocumentClient.UpdateItemInput = {
-            TableName: 'UserTable',
-            Key: { id },
-            UpdateExpression: 'set #firstName = :firstName, #lastName = :lastName, #username = :username',
-            ExpressionAttributeNames: {
-                '#firstName': 'firstName',
-                '#lastName': 'lastName',
-                '#username': 'username',
-            },
-            ExpressionAttributeValues: {
-                ':firstName': firstName,
-                ':lastName': lastName,
-                ':username': username,
-            },
-            ReturnValues: 'UPDATED_NEW',
-        };
+        const { Attributes } = await updateItem('UserTable', { id }, { firstName, lastName, username });
 
-        const { Attributes } = await dbClient.update(params).promise();
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                data: Attributes,
-                message: 'User updated successfully',
-            } as APIResponse),
-        };
+        return successResponse('User updated successfully', Attributes);
     } catch (error: any) {
-        console.info({ error });
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: JSON.stringify(error.message),
-            } as APIResponse),
-        };
+        return errorResponse(error);
     }
 };
 
@@ -171,35 +78,15 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
     try {
         const id = event.queryStringParameters?.id;
 
-        // Input validation
-        if (!id) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({
-                    error: 'Missing required fields',
-                } as APIResponse),
-            };
+        const validation = validateInput({ id });
+        if (validation !== true) {
+            return missingFieldsResponse(validation);
         }
 
-        const params: DocumentClient.DeleteItemInput = {
-            TableName: 'UserTable',
-            Key: { id },
-        };
+        await deleteItem('UserTable', { id });
 
-        await dbClient.delete(params).promise();
-
-        return {
-            statusCode: 200,
-            body: JSON.stringify({
-                message: 'User deleted successfully',
-            } as APIResponse),
-        };
+        return successResponse('User deleted successfully', undefined);
     } catch (error) {
-        return {
-            statusCode: 500,
-            body: JSON.stringify({
-                error: 'Failed to delete user',
-            } as APIResponse),
-        };
+        return errorResponse(error);
     }
 };
