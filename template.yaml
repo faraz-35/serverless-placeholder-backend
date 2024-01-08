@@ -19,36 +19,27 @@ Resources:
         Type: AWS::Serverless::LayerVersion
         Properties:
             Description: AWS Dependencies for placeholder app
-            ContentUri: './layers/aws/'
+            ContentUri: './dist/layers/aws/'
             CompatibleRuntimes:
                 - nodejs14.x
             LicenseInfo: 'MIT'
             RetentionPolicy: Delete
 
-    ObjectFunctionStack:
+    ObjectStack:
         Type: AWS::Serverless::Application
         Properties:
-            Location: ./templates/function/object-function.yaml
+            Location: ./templates/object-stack.yaml
             Parameters:
                 AWSLayer: !Ref AWSLayer
                 DepLayer: !Ref DepLayer
 
-    # ObjectApiStack:
-    #     Type: AWS::Serverless::Application
-    #     Properties:
-    #         Location: ./templates/api/object-api.yaml
-    #         Parameters:
-    #             ObjectAdminFunctionArn: !GetAtt ObjectFunctionStack.Outputs.ObjectFunctionArn
-
-    # UserApiStack:
-    #     Type: AWS::Serverless::Application
-    #     Properties:
-    #         Location: ./templates/api/user-api.yaml
-
-    # UserFunctionStack:
-    #     Type: AWS::Serverless::Application
-    #     Properties:
-    #         Location: ./templates/function/user-function.yaml
+    UserStack:
+        Type: AWS::Serverless::Application
+        Properties:
+            Location: ./templates/user-stack.yaml
+            Parameters:
+                AWSLayer: !Ref AWSLayer
+                DepLayer: !Ref DepLayer
 
     # ApplicationResourceGroup:
     #     Type: AWS::ResourceGroups::Group
@@ -63,7 +54,3 @@ Resources:
     #         ResourceGroupName:
     #             Ref: ApplicationResourceGroup
     #         AutoConfigurationEnabled: true
-# Outputs:
-#     ObjectAdminFunctionApi:
-#         Description: 'API Gateway endpoint URL for Prod stage for ObjectAdminFunction'
-#         Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/object-admin'

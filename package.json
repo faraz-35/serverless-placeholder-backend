@@ -10,7 +10,9 @@
         "watch-build": "nodemon --exec 'sam build' --watch .  -e js,ts,json,yaml --delay 100ms --quiet",
         "api": "sam local start-api",
         "deploy": "sam deploy --guided",
-        "dev": "./scripts/dynamodb-local-setup.sh && sam build  && ( npm run api & npm run watch-build )"
+        "dev": "./scripts/dynamodb-local-setup.sh && sam build  && ( npm run api & npm run watch-build )",
+        "copy": "npx ncp ./layers/aws/nodejs/dynamodb/node_modules ./dist/layers/aws/nodejs/dynamodb/node_modules",
+        "build-layer": "tsc && npm run copy"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.92",

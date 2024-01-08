@@ -29,6 +29,11 @@ Globals:
             - !Ref DepLayer
 
 Resources:
+    ObjectApi:
+        Type: AWS::Serverless::Api
+        Properties:
+            StageName: Dev
+
     ObjectTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -44,7 +49,7 @@ Resources:
     ObjectAdminFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: ../../functions/object/object-admin/
+            CodeUri: ../functions/object/object-admin/
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref ObjectTable
@@ -54,6 +59,7 @@ Resources:
                     Properties:
                         Path: /object-admin
                         Method: ANY
+                        RestApiId: !Ref ObjectApi
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -64,8 +70,3 @@ Resources:
                 External:
                     - uuid
                     - /opt/nodejs/dynamodb/*
-
-Outputs:
-    ObjectFunctionArn:
-        Description: The ARN of the ObjectFunction
-        Value: !GetAtt ObjectAdminFunction.Arn

@@ -1,7 +1,9 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
+const isLocal = process.env.AWS_SAM_LOCAL === 'true';
+
 const dbClient = new DocumentClient({
-    endpoint: 'http://host.docker.internal:8000',
+    endpoint: isLocal ? 'http://host.docker.internal:8000' : undefined,
 });
 
 // Put Item

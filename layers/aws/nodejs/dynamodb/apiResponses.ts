@@ -1,5 +1,5 @@
 import { APIGatewayProxyResult } from 'aws-lambda';
-import { APIResponse } from '../../../../../types/globals';
+import { APIResponse } from '../../../../types/globals';
 
 export const missingFieldsResponse = (missingFields: string[]): APIGatewayProxyResult => {
     return {
@@ -40,7 +40,7 @@ export const errorResponse = (error: any): APIGatewayProxyResult => {
     };
 };
 
-export const INVALID_ENDPOINT = {
+export const INVALID_ENDPOINT: APIGatewayProxyResult = {
     statusCode: 404,
     body: JSON.stringify({
         error: 'Invalid endpoint',
