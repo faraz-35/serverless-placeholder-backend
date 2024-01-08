@@ -48,6 +48,12 @@ Resources:
             Policies:
                 - DynamoDBCrudPolicy:
                       TableName: !Ref ObjectTable
+            Events:
+                ObjectApi:
+                    Type: Api
+                    Properties:
+                        Path: /object-admin
+                        Method: ANY
         Metadata:
             BuildMethod: esbuild
             BuildProperties:

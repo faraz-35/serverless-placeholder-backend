@@ -33,12 +33,12 @@ Resources:
                 AWSLayer: !Ref AWSLayer
                 DepLayer: !Ref DepLayer
 
-    ObjectApiStack:
-        Type: AWS::Serverless::Application
-        Properties:
-            Location: ./templates/api/object-api.yaml
-            Parameters:
-                ObjectAdminFunctionArn: !GetAtt ObjectFunctionStack.Outputs.ObjectFunctionArn
+    # ObjectApiStack:
+    #     Type: AWS::Serverless::Application
+    #     Properties:
+    #         Location: ./templates/api/object-api.yaml
+    #         Parameters:
+    #             ObjectAdminFunctionArn: !GetAtt ObjectFunctionStack.Outputs.ObjectFunctionArn
 
     # UserApiStack:
     #     Type: AWS::Serverless::Application
@@ -63,8 +63,7 @@ Resources:
     #         ResourceGroupName:
     #             Ref: ApplicationResourceGroup
     #         AutoConfigurationEnabled: true
-
-Outputs:
-    ApiURL:
-        Description: 'API Gateway endpoint URL for Prod stage'
-        Value: !GetAtt ObjectApiStack.Outputs.ApiURL
+# Outputs:
+#     ObjectAdminFunctionApi:
+#         Description: 'API Gateway endpoint URL for Prod stage for ObjectAdminFunction'
+#         Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/object-admin'
