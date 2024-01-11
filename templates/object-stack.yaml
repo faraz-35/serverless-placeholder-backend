@@ -12,6 +12,10 @@ Parameters:
     DepLayer:
         Type: String
         Description: The ARN of the DepLayer
+    Environment:
+        Type: String
+        AllowedValues: [DEV, PROD]
+        Default: DEV
 
 Globals:
     Function:
@@ -23,28 +27,29 @@ Globals:
         Handler: app.lambdaHandler
         Environment:
             Variables:
-                OBJECT_TABLE: !Ref ObjectTable
+                TABLE_NAME: !Ref ObjectTable
+                ENV: !Ref Environment
+        Tags:
+            Environment: !Ref Environment
         Layers:
             - !Ref AWSLayer
             - !Ref DepLayer
 
 Resources:
     ObjectApi:
-        Type: AWS::Serverless::Api
+        Type: AWS::Serverless::HttpApi
         Properties:
             StageName: Dev
+            Tags:
+                Environment: !Ref Environment
 
     ObjectTable:
-        Type: AWS::DynamoDB::Table
+        Type: AWS::Serverless::SimpleTable
         Properties:
+            PrimaryKey:
+                Name: id
+                Type: String
             TableName: ObjectTable
-            AttributeDefinitions:
-                - AttributeName: id
-                  AttributeType: S
-            KeySchema:
-                - AttributeName: id
-                  KeyType: HASH
-            BillingMode: PAY_PER_REQUEST
 
     ObjectAdminFunction:
         Type: AWS::Serverless::Function
@@ -55,11 +60,11 @@ Resources:
                       TableName: !Ref ObjectTable
             Events:
                 ObjectApi:
-                    Type: Api
+                    Type: HttpApi
                     Properties:
                         Path: /object-admin
                         Method: ANY
-                        RestApiId: !Ref ObjectApi
+                        ApiId: !Ref ObjectApi
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -70,3 +75,8 @@ Resources:
                 External:
                     - uuid
                     - /opt/nodejs/dynamodb/*
+
+Outputs:
+    ObjectApi:
+        Description: 'API Gateway endpoint URL for Prod stage for ObjectApi function'
+        Value: !Sub 'https://${ObjectApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/'

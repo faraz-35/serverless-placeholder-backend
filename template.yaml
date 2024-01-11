@@ -5,6 +5,12 @@ Description: >
 
     Sample SAM Template for serverless-placeholder
 
+Parameters:
+    Environment:
+        Type: String
+        AllowedValues: [LOCAL, DEV, PROD]
+        Default: DEV
+
 Resources:
     DepLayer:
         Type: AWS::Serverless::LayerVersion
@@ -32,6 +38,9 @@ Resources:
             Parameters:
                 AWSLayer: !Ref AWSLayer
                 DepLayer: !Ref DepLayer
+                Environment: !Ref Environment
+            Tags:
+                Environment: !Ref Environment
 
     UserStack:
         Type: AWS::Serverless::Application
@@ -40,17 +49,27 @@ Resources:
             Parameters:
                 AWSLayer: !Ref AWSLayer
                 DepLayer: !Ref DepLayer
+                Environment: !Ref Environment
+            Tags:
+                Environment: !Ref Environment
 
-    # ApplicationResourceGroup:
-    #     Type: AWS::ResourceGroups::Group
-    #     Properties:
-    #         Name:
-    #             Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
-    #         ResourceQuery:
-    #             Type: CLOUDFORMATION_STACK_1_0
-    # ApplicationInsightsMonitoring:
-    #     Type: AWS::ApplicationInsights::Application
-    #     Properties:
-    #         ResourceGroupName:
-    #             Ref: ApplicationResourceGroup
-    #         AutoConfigurationEnabled: true
+    ApplicationResourceGroup:
+        Type: AWS::ResourceGroups::Group
+        Properties:
+            Name: serverless-placeholder
+            ResourceQuery:
+                Type: CLOUDFORMATION_STACK_1_0
+
+    ApplicationInsightsMonitoring:
+        Type: AWS::ApplicationInsights::Application
+        Properties:
+            ResourceGroupName:
+                Ref: ApplicationResourceGroup
+            AutoConfigurationEnabled: true
+Outputs:
+    ObjectApi:
+        Description: API Gateway V1 endpoint URL
+        Value: !GetAtt ObjectStack.Outputs.ObjectApi
+    UserApi:
+        Description: API Gateway V1 endpoint URL
+        Value: !GetAtt UserStack.Outputs.UserApi

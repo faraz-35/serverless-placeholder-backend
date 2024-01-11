@@ -1,6 +1,7 @@
 import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
-const isLocal = process.env.AWS_SAM_LOCAL === 'true';
+const isLocal = process.env.ENV === 'LOCAL';
+const DDBTable = process.env.TABLE_NAME;
 
 const dbClient = new DocumentClient({
     endpoint: isLocal ? 'http://host.docker.internal:8000' : undefined,
@@ -8,11 +9,11 @@ const dbClient = new DocumentClient({
 
 // Put Item
 export const putItem = (
-    table: string,
     item: DocumentClient.PutItemInputAttributeMap,
+    tableName: string = DDBTable!,
 ): Promise<DocumentClient.PutItemOutput> => {
     const params: DocumentClient.PutItemInput = {
-        TableName: table,
+        TableName: tableName,
         Item: {
             ...item,
         },
@@ -22,12 +23,12 @@ export const putItem = (
 
 // Get Item
 export const getItem = (
-    table: string,
     key: DocumentClient.Key,
     attributes?: string[],
+    tableName: string = DDBTable!,
 ): Promise<DocumentClient.GetItemOutput> => {
     const params: DocumentClient.GetItemInput = {
-        TableName: table,
+        TableName: tableName,
         Key: key,
         ProjectionExpression: attributes ? attributes.join(', ') : undefined,
     };
@@ -35,22 +36,36 @@ export const getItem = (
 };
 
 // Scan
-export const scan = (table: string, limit?: string, exclusiveStartKey?: string): Promise<DocumentClient.ScanOutput> => {
+export const scan = (
+    limit?: string,
+    exclusiveStartKey?: string,
+    attributes?: string,
+    tableName: string = DDBTable!,
+): Promise<DocumentClient.ScanOutput> => {
     const params: DocumentClient.ScanInput = {
-        TableName: table,
+        TableName: tableName,
         Limit: limit ? parseInt(limit) : undefined,
-        ExclusiveStartKey: exclusiveStartKey ? JSON.parse(decodeURIComponent(exclusiveStartKey)) : undefined,
     };
+    if (exclusiveStartKey) {
+        params.ExclusiveStartKey = { id: exclusiveStartKey };
+    }
+    if (attributes?.length || 0 > 0) {
+        params.ProjectionExpression = attributes?.split(',').join(', ');
+    }
     return dbClient.scan(params).promise();
 };
 
 // Query
-export const queryItem = (tableName: string, queryObject: Record<string, any>): Promise<DocumentClient.QueryOutput> => {
+export const queryItem = (
+    queryObject: Record<string, any>,
+    tableName: string = DDBTable!,
+): Promise<DocumentClient.QueryOutput> => {
     const queryParameter = Object.keys(queryObject)[0];
     const queryValue = queryObject[queryParameter];
 
     const params: DocumentClient.QueryInput = {
         TableName: tableName,
+        IndexName: queryParameter,
         KeyConditionExpression: `#${queryParameter} = :queryValue`,
         ExpressionAttributeNames: {
             [`#${queryParameter}`]: queryParameter,
@@ -65,9 +80,9 @@ export const queryItem = (tableName: string, queryObject: Record<string, any>): 
 
 // Update Item
 export const updateItem = (
-    tableName: string,
     key: DocumentClient.Key,
     object: DocumentClient.ExpressionAttributeValueMap,
+    tableName: string = DDBTable!,
 ): Promise<DocumentClient.UpdateItemOutput> => {
     let updateExpression = 'set ';
     const expressionAttributeNames: Record<string, any> = {};
@@ -93,10 +108,10 @@ export const updateItem = (
 
 //Update append item to array
 export const appendToArray = (
-    tableName: string,
     key: DocumentClient.Key,
     arrayName: string,
     value: any,
+    tableName: string = DDBTable!,
 ): Promise<DocumentClient.UpdateItemOutput> => {
     const params: DocumentClient.UpdateItemInput = {
         TableName: tableName,
@@ -116,10 +131,10 @@ export const appendToArray = (
 
 //Update remove item form  array
 export const removeFromArray = async (
-    tableName: string,
     key: DocumentClient.Key,
     arrayName: string,
     value: any,
+    tableName: string = DDBTable!,
 ): Promise<DocumentClient.UpdateItemOutput> => {
     // Get the current item
     const currentItem = await dbClient.get({ TableName: tableName, Key: key }).promise();
@@ -148,9 +163,12 @@ export const removeFromArray = async (
 };
 
 // Delete Item
-export const deleteItem = (table: string, key: DocumentClient.Key): Promise<DocumentClient.DeleteItemOutput> => {
+export const deleteItem = (
+    key: DocumentClient.Key,
+    tableName: string = DDBTable!,
+): Promise<DocumentClient.DeleteItemOutput> => {
     const params: DocumentClient.DeleteItemInput = {
-        TableName: table,
+        TableName: tableName,
         Key: key,
     };
     return dbClient.delete(params).promise();

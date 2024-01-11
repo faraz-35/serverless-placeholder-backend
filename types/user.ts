@@ -32,13 +32,4 @@ export interface IManageObject {
     objectId: string;
 }
 
-//User Admin Interfaces
-export interface ICreateUser {
-    // TODO: extends user escept id
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    imageUrl: string;
-}
+export type ICreateUser = Omit<User, 'id'>;

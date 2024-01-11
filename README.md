@@ -1,26 +1,48 @@
-## Deploy the sample application
+# Serverless Application Starter Template
 
-The Serverless Application Model Command Line Interface (SAM CLI) is an extension of the AWS CLI that adds functionality for building and testing Lambda applications. It uses Docker to run your functions in an Amazon Linux environment that matches Lambda. It can also emulate your application's build environment and API.
+## Description
 
-To use the SAM CLI, you need the following tools.
+This starter template provides a basic CRUD (Create, Read, Update, Delete) application built with a cloud-native architecture using AWS Serverless Application Model (SAM). It leverages AWS services such as API Gateway, Lambda, and DynamoDB. This template serves as a placeholder for a serverless backend.
 
--   SAM CLI - [Install the SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
--   Node.js - [Install Node.js 14](https://nodejs.org/en/), including the NPM package management tool.
--   Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community)
+## Features
 
-To build and deploy your application for the first time, run the following in your shell:
+-   Create, read, update, and delete operations using AWS Lambda functions
+-   API Gateway for handling requests and responses
+-   DynamoDB for persistent data storage
 
-```bash
-sam build
-sam deploy --guided
-```
+## Installation
 
-The first command will build the source of your application. The second command will package and deploy your application to AWS, with a series of prompts:
+To install the application, follow these steps:
 
--   **Stack Name**: The name of the stack to deploy to CloudFormation. This should be unique to your account and region, and a good starting point would be something matching your project name.
--   **AWS Region**: The AWS region you want to deploy your app to.
--   **Confirm changes before deploy**: If set to yes, any change sets will be shown to you before execution for manual review. If set to no, the AWS SAM CLI will automatically deploy application changes.
--   **Allow SAM CLI IAM role creation**: Many AWS SAM templates, including this example, create AWS IAM roles required for the AWS Lambda function(s) included to access AWS services. By default, these are scoped down to minimum required permissions. To deploy an AWS CloudFormation stack which creates or modifies IAM roles, the `CAPABILITY_IAM` value for `capabilities` must be provided. If permission isn't provided through this prompt, to deploy this example you must explicitly pass `--capabilities CAPABILITY_IAM` to the `sam deploy` command.
--   **Save arguments to samconfig.toml**: If set to yes, your choices will be saved to a configuration file inside the project, so that in the future you can just re-run `sam deploy` without parameters to deploy changes to your application.
+1. Clone the repository: `git clone https://github.com/faraz-35/serverless-placeholder-backend`
+2. Navigate to the project directory: `cd serverless-placeholder`
+3. Install dependencies: `npm install` or `yarn install`
+4. Update default parameters for stack name and region in samconfig.toml file.
+5. Deploy the application using AWS SAM: `npm run build-layer && sam build && sam deploy`
 
-You can find your API Gateway Endpoint URL in the output values displayed after deployment.
+## Usage
+
+To run the application locally (Needs running docker):
+
+1. Start the server: `npm run dev`
+2. Open your web browser and visit: `http://localhost:3000`
+
+## Planned Improvements
+
+Here are some improvements we're planning to implement in the future:
+
+-   **LocalStack Integration**: To improve the local development experience, we plan to integrate LocalStack. This will allow developers to test AWS services locally without needing to deploy their applications.
+
+-   **VPC Integration**: For enhanced security, we plan to run the application inside a Virtual Private Cloud (VPC). This will provide a more secure environment by isolating the application from the public internet.
+
+-   **Additional AWS Resources**: We plan to incorporate more AWS resources into the application's workflows to expand its capabilities and provide more functionality.
+
+Please note that these are planned improvements and the timeline for their implementation may vary. We welcome contributions to help implement these features!
+
+## Contributing
+
+Contributions are welcome! Please read the [contributing guidelines](./CONTRIBUTING.md) before getting started.
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE.md).

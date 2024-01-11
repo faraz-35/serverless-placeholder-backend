@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ICreateObject, ObjectType, IUpdateObject } from '../../../types/object';
@@ -6,7 +6,7 @@ import { deleteItem, getItem, putItem, scan, updateItem } from '/opt/nodejs/dyna
 import { missingFieldsResponse, errorResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 
-export const createObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const createObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const { name }: ICreateObject = JSON.parse(event.body || '');
 
@@ -19,24 +19,22 @@ export const createObject = async (event: APIGatewayProxyEvent): Promise<APIGate
             id: uuidv4(),
             name,
         };
-        await putItem('ObjectTable', object);
+        await putItem(object);
         return successResponse('Object created successfully', object);
     } catch (error: any) {
         return errorResponse(error);
     }
 };
-export const getObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
-        const id = event.queryStringParameters?.id;
-        const limit = event.queryStringParameters?.limit;
-        const exclusiveStartKey = event.queryStringParameters?.exclusiveStartKey;
+        const { id, limit, exclusiveStartKey } = event.queryStringParameters || {};
         if (id) {
-            const result = await getItem('ObjectTable', { id });
+            const result = await getItem({ id });
             const item = result.Item;
 
             return successResponse(undefined, item);
         } else {
-            const result = await scan('ObjectTable', limit, exclusiveStartKey);
+            const result = await scan(limit, exclusiveStartKey);
             const items = result.Items;
             const lastEvaluatedKey = result.LastEvaluatedKey;
 
@@ -47,7 +45,7 @@ export const getObject = async (event: APIGatewayProxyEvent): Promise<APIGateway
     }
 };
 
-export const updateObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const updateObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
         const { name }: IUpdateObject = JSON.parse(event.body || '');
@@ -57,7 +55,7 @@ export const updateObject = async (event: APIGatewayProxyEvent): Promise<APIGate
             return missingFieldsResponse(validation);
         }
 
-        const { Attributes } = await updateItem('ObjectTable', { id }, { name });
+        const { Attributes } = await updateItem({ id }, { name });
 
         return successResponse('Object updated successfully', Attributes);
     } catch (error: any) {
@@ -65,7 +63,7 @@ export const updateObject = async (event: APIGatewayProxyEvent): Promise<APIGate
     }
 };
 
-export const deleteObject = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const deleteObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
 
@@ -74,7 +72,7 @@ export const deleteObject = async (event: APIGatewayProxyEvent): Promise<APIGate
             return missingFieldsResponse(validation);
         }
 
-        await deleteItem('ObjectTable', { id });
+        await deleteItem({ id });
         return successResponse('Object deleted successfully', undefined);
     } catch (error: any) {
         return errorResponse(error);

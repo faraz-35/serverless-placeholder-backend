@@ -1,11 +1,11 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 import { IChangePassword, IUpdateUser } from '../../../types/user';
 import { deleteItem, getItem, updateItem } from '/opt/nodejs/dynamodb';
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 import { errorResponse, missingFieldsResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 
-export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
 
@@ -14,15 +14,16 @@ export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
             return missingFieldsResponse(validation);
         }
 
-        const result = await getItem('UserTable', { id });
+        const result = await getItem({ id });
         const item = result.Item;
+        delete item?.password;
         return successResponse(undefined, item);
     } catch (error: any) {
         return errorResponse(error);
     }
 };
 
-export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const updateUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
         const { username, firstName, lastName, imageUrl }: IUpdateUser = JSON.parse(event.body || '');
@@ -32,14 +33,14 @@ export const updateUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
             return missingFieldsResponse(validation);
         }
 
-        const { Attributes } = await updateItem('UserTable', { id }, { firstName, lastName, username, imageUrl });
+        const { Attributes } = await updateItem({ id }, { firstName, lastName, username, imageUrl });
         return successResponse('User details updated successfully', Attributes);
     } catch (error: any) {
         return errorResponse(error);
     }
 };
 
-export const changePassword = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const changePassword = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
         const { oldPassword, newPassword }: IChangePassword = JSON.parse(event.body || '');
@@ -49,14 +50,14 @@ export const changePassword = async (event: APIGatewayProxyEvent): Promise<APIGa
             return missingFieldsResponse(validation);
         }
 
-        await updateItem('UserTable', { id }, { password: newPassword });
+        await updateItem({ id }, { password: newPassword });
         return successResponse('Password changed successfully');
     } catch (error: any) {
         return errorResponse(error);
     }
 };
 
-export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const deleteUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
 
@@ -65,7 +66,7 @@ export const deleteUser = async (event: APIGatewayProxyEvent): Promise<APIGatewa
             return missingFieldsResponse(validation);
         }
 
-        deleteItem('UserTable', { id });
+        deleteItem({ id });
         return successResponse('User deleted successfully');
     } catch (error: any) {
         return errorResponse(error);
