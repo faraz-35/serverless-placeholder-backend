@@ -1,11 +1,11 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 import { errorResponse, missingFieldsResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 import { appendToArray, getItem, removeFromArray } from '/opt/nodejs/dynamodb';
 import { IManageObject } from '../../../types/user';
 
-export const getObjectsByUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getObjectsByUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
 
@@ -14,7 +14,7 @@ export const getObjectsByUser = async (event: APIGatewayProxyEvent): Promise<API
             return missingFieldsResponse(validation);
         }
 
-        const result = await getItem('UserTable', { id }, ['objects']);
+        const result = await getItem({ id }, ['objects']);
 
         return successResponse(undefined, result.Item || []);
     } catch (error: any) {
@@ -22,7 +22,7 @@ export const getObjectsByUser = async (event: APIGatewayProxyEvent): Promise<API
     }
 };
 
-export const addObjectToUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const addObjectToUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
         const { objectId }: IManageObject = JSON.parse(event.body || '');
@@ -32,7 +32,7 @@ export const addObjectToUser = async (event: APIGatewayProxyEvent): Promise<APIG
             return missingFieldsResponse(validation);
         }
 
-        const result = await appendToArray('UserTable', { id }, 'objects', objectId);
+        const result = await appendToArray({ id }, 'objects', objectId);
 
         return successResponse('Object added to user successfully', result.Attributes?.objects || []);
     } catch (error: any) {
@@ -40,7 +40,7 @@ export const addObjectToUser = async (event: APIGatewayProxyEvent): Promise<APIG
     }
 };
 
-export const removeObjectFromUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const removeObjectFromUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
         const { objectId }: IManageObject = JSON.parse(event.body || '');
@@ -50,7 +50,7 @@ export const removeObjectFromUser = async (event: APIGatewayProxyEvent): Promise
             return missingFieldsResponse(validation);
         }
 
-        const result = await removeFromArray('UserTable', { id }, 'objects', objectId);
+        const result = await removeFromArray({ id }, 'objects', objectId);
 
         return successResponse('Object removed from user successfully', result.Attributes?.objects || []);
     } catch (error: any) {

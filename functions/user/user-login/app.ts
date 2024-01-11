@@ -1,8 +1,8 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import bcrypt from 'bcryptjs';
 
 import { IUserLogin } from '../../../types/user';
-import { queryItem } from '/opt/nodejs/dynamodb';
+import { getItem, queryItem } from '/opt/nodejs/dynamodb';
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 import {
     errorResponse,
@@ -11,7 +11,7 @@ import {
     successResponse,
 } from '/opt/nodejs/dynamodb/apiResponses';
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
     try {
         const { email, password }: IUserLogin = JSON.parse(event.body || '');
 
@@ -20,7 +20,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             return missingFieldsResponse(validation);
         }
 
-        const result = await queryItem('UserTable', { email });
+        const result = await queryItem({ email });
         const user = result.Items ? result.Items[0] : null;
 
         if (!user) {
@@ -30,8 +30,9 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
         if (!match) {
             return invalidFieldResponse('password');
         } else {
+            const completeUser = await getItem({ id: user.id });
             delete user.password;
-            return successResponse('User logged in successfully', user);
+            return successResponse('User logged in successfully', completeUser);
         }
     } catch (error: any) {
         return errorResponse(error);

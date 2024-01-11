@@ -1,10 +1,11 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 
 import { deleteUser, getUser, updateUser, changePassword } from './userManagment';
 import { INVALID_ENDPOINT } from '/opt/nodejs/dynamodb/apiResponses';
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const { path, httpMethod } = event;
+export const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+    const httpMethod = event.requestContext.http.method;
+    const path = event.rawPath;
     switch (path) {
         case '/user-management/changePassword':
             return changePassword(event);

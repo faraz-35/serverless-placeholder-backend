@@ -3,18 +3,13 @@
         "target": "es2017",
         "strict": true,
         "preserveConstEnums": true,
-        "noEmit": true,
         "sourceMap": false,
         "module": "CommonJS",
         "moduleResolution": "node",
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "outDir": "./dist",
-        "baseUrl": ".",
-        "paths": {
-            "/opt/nodejs/*": ["layers/aws/nodejs/*"]
-        }
+        "outDir": "../../../../dist"
     },
     "exclude": ["node_modules", "**/*.test.ts"]
 }

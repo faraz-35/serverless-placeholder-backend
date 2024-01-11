@@ -11,8 +11,8 @@
         "api": "sam local start-api",
         "deploy": "sam deploy --guided",
         "dev": "./scripts/dynamodb-local-setup.sh && sam build  && ( npm run api & npm run watch-build )",
-        "copy": "npx ncp ./layers/aws/nodejs/dynamodb/node_modules ./dist/layers/aws/nodejs/dynamodb/node_modules",
-        "build-layer": "tsc && npm run copy"
+        "copy": "cp ./layers/aws/nodejs/dynamodb/package.json ./dist/layers/aws/nodejs/dynamodb/ ",
+        "build-layer": "tsc -p ./layers/aws/nodejs/dynamodb && npm run copy && cd ./dist/layers/aws/nodejs/dynamodb && npm install --production && cd ../../../../../"
     },
     "devDependencies": {
         "@types/aws-lambda": "^8.10.92",

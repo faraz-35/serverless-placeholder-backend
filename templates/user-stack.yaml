@@ -12,6 +12,10 @@ Parameters:
     DepLayer:
         Type: String
         Description: The ARN of the DepLayer
+    Environment:
+        Type: String
+        AllowedValues: [DEV, PROD]
+        Default: DEV
 Globals:
     Function:
         Timeout: 3
@@ -22,16 +26,21 @@ Globals:
         Handler: app.lambdaHandler
         Environment:
             Variables:
-                USER_TABLE: !Ref UserTable
+                TABLE_NAME: !Ref UserTable
+                ENV: !Ref Environment
+        Tags:
+            Environment: !Ref Environment
         Layers:
             - !Ref DepLayer
             - !Ref AWSLayer
 
 Resources:
     UserApi:
-        Type: AWS::Serverless::Api
+        Type: AWS::Serverless::HttpApi
         Properties:
             StageName: Dev
+            Tags:
+                Environment: !Ref Environment
     UserTable:
         Type: AWS::DynamoDB::Table
         Properties:
@@ -46,12 +55,14 @@ Resources:
                   KeyType: HASH
             BillingMode: PAY_PER_REQUEST
             GlobalSecondaryIndexes:
-                - IndexName: EmailIndex
+                - IndexName: email
                   KeySchema:
                       - AttributeName: email
                         KeyType: HASH
                   Projection:
-                      ProjectionType: ALL
+                      ProjectionType: INCLUDE
+                      NonKeyAttributes:
+                          - password
 
     UserAdminFunction:
         Type: AWS::Serverless::Function
@@ -62,11 +73,12 @@ Resources:
                       TableName: !Ref UserTable
             Events:
                 UserAdminApi:
-                    Type: Api
+                    Type: HttpApi
                     Properties:
                         Path: /user-admin
                         Method: ANY
-                        RestApiId: !Ref UserApi
+                        ApiId: !Ref UserApi
+
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -88,11 +100,12 @@ Resources:
                       TableName: !Ref UserTable
             Events:
                 UserManagementApi:
-                    Type: Api
+                    Type: HttpApi
                     Properties:
                         Path: /user-management
                         Method: ANY
-                        RestApiId: !Ref UserApi
+                        ApiId: !Ref UserApi
+
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -114,11 +127,12 @@ Resources:
                       TableName: !Ref UserTable
             Events:
                 UserObjectApi:
-                    Type: Api
+                    Type: HttpApi
                     Properties:
                         Path: /user-object
                         Method: ANY
-                        RestApiId: !Ref UserApi
+                        ApiId: !Ref UserApi
+
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -138,11 +152,12 @@ Resources:
                       TableName: !Ref UserTable
             Events:
                 UserLoginApi:
-                    Type: Api
+                    Type: HttpApi
                     Properties:
                         Path: /user-login
                         Method: POST
-                        RestApiId: !Ref UserApi
+                        ApiId: !Ref UserApi
+
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -164,11 +179,12 @@ Resources:
                       TableName: !Ref UserTable
             Events:
                 UserSignupApi:
-                    Type: Api
+                    Type: HttpApi
                     Properties:
                         Path: /user-signup
                         Method: POST
-                        RestApiId: !Ref UserApi
+                        ApiId: !Ref UserApi
+
         Metadata:
             BuildMethod: esbuild
             BuildProperties:
@@ -180,3 +196,7 @@ Resources:
                     - /opt/nodejs/dynamodb/*
                     - bcryptjs
                     - uuid
+Outputs:
+    UserApi:
+        Description: 'API Gateway endpoint URL for Prod stage for UserApi function'
+        Value: !Sub 'https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/'
