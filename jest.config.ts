@@ -6,5 +6,10 @@ export default {
     collectCoverage: true,
     coverageDirectory: 'coverage',
     coverageProvider: 'v8',
-    testMatch: ['**/tests/unit/*.test.ts'],
+    testMatch: ['**/*.test.ts'],
+    moduleNameMapper: {
+        '/opt/nodejs/(.*)': '<rootDir>/layers/aws/nodejs/$1',
+    },
+    modulePaths: ['<rootDir>'],
+    setupFiles: ['./jest.setup.ts'],
 };

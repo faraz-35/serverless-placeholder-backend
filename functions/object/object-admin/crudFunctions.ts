@@ -1,4 +1,4 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ICreateObject, ObjectType, IUpdateObject } from '../../../types/object';
@@ -6,7 +6,7 @@ import { deleteItem, getItem, putItem, scan, updateItem } from '/opt/nodejs/dyna
 import { missingFieldsResponse, errorResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 
-export const createObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const createObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const { name }: ICreateObject = JSON.parse(event.body || '');
 
@@ -25,7 +25,7 @@ export const createObject = async (event: APIGatewayProxyEventV2): Promise<APIGa
         return errorResponse(error);
     }
 };
-export const getObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const getObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const { id, limit, exclusiveStartKey } = event.queryStringParameters || {};
         if (id) {
@@ -45,7 +45,7 @@ export const getObject = async (event: APIGatewayProxyEventV2): Promise<APIGatew
     }
 };
 
-export const updateObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const updateObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
         const { name }: IUpdateObject = JSON.parse(event.body || '');
@@ -63,7 +63,7 @@ export const updateObject = async (event: APIGatewayProxyEventV2): Promise<APIGa
     }
 };
 
-export const deleteObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const deleteObject = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
 

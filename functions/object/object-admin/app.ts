@@ -1,9 +1,9 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 
 import { createObject, deleteObject, getObject, updateObject } from './crudFunctions';
 import { INVALID_ENDPOINT } from '/opt/nodejs/dynamodb/apiResponses';
 
-export const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     switch (event.requestContext.http.method) {
         case 'POST':
             return createObject(event);

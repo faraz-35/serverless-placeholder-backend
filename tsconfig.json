@@ -13,6 +13,7 @@
         "outDir": "./dist",
         "baseUrl": ".",
         "paths": {
+            "@/*": ["*"],
             "/opt/nodejs/*": ["layers/aws/nodejs/*"]
         }
     },

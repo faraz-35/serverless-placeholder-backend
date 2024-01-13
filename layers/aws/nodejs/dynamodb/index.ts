@@ -4,7 +4,8 @@ const isLocal = process.env.ENV === 'LOCAL';
 const DDBTable = process.env.TABLE_NAME;
 
 const dbClient = new DocumentClient({
-    endpoint: isLocal ? 'http://host.docker.internal:8000' : undefined,
+    endpoint: isLocal ? 'http://localhost:8000' : undefined,
+    region: isLocal ? 'ca-central-1' : undefined,
 });
 
 // Put Item

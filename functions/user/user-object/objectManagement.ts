@@ -1,11 +1,11 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 import { errorResponse, missingFieldsResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 import { appendToArray, getItem, removeFromArray } from '/opt/nodejs/dynamodb';
 import { IManageObject } from '../../../types/user';
 
-export const getObjectsByUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const getObjectsByUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
 
@@ -22,7 +22,7 @@ export const getObjectsByUser = async (event: APIGatewayProxyEventV2): Promise<A
     }
 };
 
-export const addObjectToUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const addObjectToUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
         const { objectId }: IManageObject = JSON.parse(event.body || '');
@@ -40,7 +40,9 @@ export const addObjectToUser = async (event: APIGatewayProxyEventV2): Promise<AP
     }
 };
 
-export const removeObjectFromUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const removeObjectFromUser = async (
+    event: APIGatewayProxyEventV2,
+): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
         const { objectId }: IManageObject = JSON.parse(event.body || '');
