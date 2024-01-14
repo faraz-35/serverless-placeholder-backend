@@ -1,7 +1,7 @@
-import { APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { APIResponse } from '../../../../types/globals';
 
-export const missingFieldsResponse = (missingFields: string[]): APIGatewayProxyResultV2 => {
+export const missingFieldsResponse = (missingFields: string[]): APIGatewayProxyStructuredResultV2 => {
     return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -13,7 +13,7 @@ export const missingFieldsResponse = (missingFields: string[]): APIGatewayProxyR
     };
 };
 
-export const invalidFieldResponse = (field: string): APIGatewayProxyResultV2 => {
+export const invalidFieldResponse = (field: string): APIGatewayProxyStructuredResultV2 => {
     return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
@@ -24,7 +24,7 @@ export const invalidFieldResponse = (field: string): APIGatewayProxyResultV2 => 
     };
 };
 
-export const successResponse = (message?: string, data?: unknown): APIGatewayProxyResultV2 => {
+export const successResponse = (message?: string, data?: unknown): APIGatewayProxyStructuredResultV2 => {
     return {
         statusCode: 200,
         headers: { 'Content-Type': 'application/json' },
@@ -36,7 +36,7 @@ export const successResponse = (message?: string, data?: unknown): APIGatewayPro
     };
 };
 
-export const errorResponse = (error: any): APIGatewayProxyResultV2 => {
+export const errorResponse = (error: any): APIGatewayProxyStructuredResultV2 => {
     console.info({ error });
     return {
         statusCode: 500,
@@ -48,7 +48,7 @@ export const errorResponse = (error: any): APIGatewayProxyResultV2 => {
     };
 };
 
-export const INVALID_ENDPOINT: APIGatewayProxyResultV2 = {
+export const INVALID_ENDPOINT: APIGatewayProxyStructuredResultV2 = {
     statusCode: 404,
     headers: { 'Content-Type': 'application/json' },
     isBase64Encoded: false,

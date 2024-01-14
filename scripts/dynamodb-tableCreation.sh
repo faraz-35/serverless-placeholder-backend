@@ -12,7 +12,7 @@ user_table_definition='{
   "BillingMode": "PAY_PER_REQUEST",
   "GlobalSecondaryIndexes": [
     {
-      "IndexName": "EmailIndex",
+      "IndexName": "email",
       "KeySchema": [
         { "AttributeName": "email", "KeyType": "HASH" }
       ],

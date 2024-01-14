@@ -1,11 +1,11 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 
 import { IChangePassword, IUpdateUser } from '../../../types/user';
 import { deleteItem, getItem, updateItem } from '/opt/nodejs/dynamodb';
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 import { errorResponse, missingFieldsResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 
-export const getUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const getUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
 
@@ -23,7 +23,7 @@ export const getUser = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     }
 };
 
-export const updateUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const updateUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id || '';
         const { username, firstName, lastName, imageUrl }: IUpdateUser = JSON.parse(event.body || '');
@@ -40,7 +40,7 @@ export const updateUser = async (event: APIGatewayProxyEventV2): Promise<APIGate
     }
 };
 
-export const changePassword = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const changePassword = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
         const { oldPassword, newPassword }: IChangePassword = JSON.parse(event.body || '');
@@ -57,7 +57,7 @@ export const changePassword = async (event: APIGatewayProxyEventV2): Promise<API
     }
 };
 
-export const deleteUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const deleteUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
 

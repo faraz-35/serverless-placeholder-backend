@@ -1,4 +1,4 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 
@@ -7,7 +7,7 @@ import { deleteItem, getItem, putItem, scan, updateItem } from '/opt/nodejs/dyna
 import { validateInput } from '/opt/nodejs/dynamodb/inputValidation';
 import { errorResponse, missingFieldsResponse, successResponse } from '/opt/nodejs/dynamodb/apiResponses';
 
-export const createUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const createUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const { username, firstName, lastName, email, password, imageUrl }: ICreateUser = JSON.parse(event.body || '');
 
@@ -34,7 +34,7 @@ export const createUser = async (event: APIGatewayProxyEventV2): Promise<APIGate
         return errorResponse(error);
     }
 };
-export const getUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const getUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const { id, limit, exclusiveStartKey, attributes } = event.queryStringParameters || {};
         if (id) {
@@ -54,7 +54,7 @@ export const getUser = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     }
 };
 
-export const updateUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const updateUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
         const { firstName, lastName, username }: IUpdateUser = JSON.parse(event.body || '');
@@ -72,7 +72,7 @@ export const updateUser = async (event: APIGatewayProxyEventV2): Promise<APIGate
     }
 };
 
-export const deleteUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const deleteUser = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const id = event.queryStringParameters?.id;
 

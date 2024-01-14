@@ -1,4 +1,4 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import bcrypt from 'bcryptjs';
 
 import { IUserLogin } from '../../../types/user';
@@ -11,7 +11,7 @@ import {
     successResponse,
 } from '/opt/nodejs/dynamodb/apiResponses';
 
-export const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+export const lambdaHandler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyStructuredResultV2> => {
     try {
         const { email, password }: IUserLogin = JSON.parse(event.body || '');
 
