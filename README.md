@@ -17,15 +17,21 @@ To install the application, follow these steps:
 1. Clone the repository: `git clone https://github.com/faraz-35/serverless-placeholder-backend`
 2. Navigate to the project directory: `cd serverless-placeholder`
 3. Install dependencies: `npm install` or `yarn install`
-4. Update default parameters for stack name and region in samconfig.toml file.
-5. Deploy the application using AWS SAM: `npm run build-layer && sam build && sam deploy`
+4. Initialize and update the Git submodules: `git submodule update --init --recursive`
+5. Initialize local dynamodb container :`npm run dynamodb-local-setup`
 
 ## Usage
 
 To run the application locally (Needs running docker):
 
-1. Start the server: `npm run dev`
-2. Open your web browser and visit: `http://localhost:3000`
+1. Update default parameters for stack name and region in samconfig.toml file.
+2. Deploy the application using AWS SAM: `sam build && sam deploy`
+
+## Testing
+
+To run the tests for the application, follow these steps:
+
+1. Setup local dynamoDB container and run the tests: `npm run test`
 
 ## Planned Improvements
 

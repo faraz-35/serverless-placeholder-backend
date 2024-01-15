@@ -14,7 +14,7 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["*"],
-            "/opt/nodejs/*": ["layers/aws/nodejs/*"]
+            "/opt/nodejs/*": ["sam-aws-layer/aws/nodejs/*"]
         }
     },
     "exclude": ["node_modules", "**/*.test.ts"]
