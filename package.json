@@ -10,9 +10,7 @@
         "watch-build": "nodemon --exec 'sam build' --watch .  -e js,ts,json,yaml --delay 100ms --quiet",
         "api": "sam local start-api",
         "deploy": "sam deploy --guided",
-        "dev": "./scripts/dynamodb-local-setup.sh && sam build  && ( npm run api & npm run watch-build )",
-        "copy": "cp ./layers/aws/nodejs/dynamodb/package.json ./dist/layers/aws/nodejs/dynamodb/ ",
-        "build-layer": "tsc -p ./layers/aws/nodejs/dynamodb && npm run copy && cd ./dist/layers/aws/nodejs/dynamodb && npm install --production && cd ../../../../../",
+        "dynamodb-local-setup": "bash ./scripts/dynamodb-local-setup.sh && bash ./scripts/dynamodb-tableCreation.sh",
         "test": "jest --watch"
     },
     "devDependencies": {

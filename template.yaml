@@ -21,22 +21,13 @@ Resources:
                 - nodejs14.x
             LicenseInfo: 'MIT'
             RetentionPolicy: Delete
-    AWSLayer:
-        Type: AWS::Serverless::LayerVersion
-        Properties:
-            Description: AWS Dependencies for placeholder app
-            ContentUri: './dist/layers/aws/'
-            CompatibleRuntimes:
-                - nodejs14.x
-            LicenseInfo: 'MIT'
-            RetentionPolicy: Delete
 
     ObjectStack:
         Type: AWS::Serverless::Application
         Properties:
             Location: ./templates/object-stack.yaml
             Parameters:
-                AWSLayer: !Ref AWSLayer
+                AWSLayer: arn:aws:lambda:ca-central-1:386499858012:layer:AWSLayer:22
                 DepLayer: !Ref DepLayer
                 Environment: !Ref Environment
             Tags:
@@ -47,7 +38,7 @@ Resources:
         Properties:
             Location: ./templates/user-stack.yaml
             Parameters:
-                AWSLayer: !Ref AWSLayer
+                AWSLayer: arn:aws:lambda:ca-central-1:386499858012:layer:AWSLayer:22
                 DepLayer: !Ref DepLayer
                 Environment: !Ref Environment
             Tags:
