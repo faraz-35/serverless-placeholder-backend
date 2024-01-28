@@ -38,7 +38,7 @@ Resources:
     UserApi:
         Type: AWS::Serverless::HttpApi
         Properties:
-            StageName: Dev
+            StageName: !Ref Environment
             Tags:
                 Environment: !Ref Environment
     UserTable:
@@ -102,7 +102,7 @@ Resources:
                 UserManagementApi:
                     Type: HttpApi
                     Properties:
-                        Path: /user-management
+                        Path: /user-management/{path}
                         Method: ANY
                         ApiId: !Ref UserApi
 
@@ -129,7 +129,7 @@ Resources:
                 UserObjectApi:
                     Type: HttpApi
                     Properties:
-                        Path: /user-object
+                        Path: /user-object/{path}
                         Method: ANY
                         ApiId: !Ref UserApi
 
@@ -199,4 +199,4 @@ Resources:
 Outputs:
     UserApi:
         Description: 'API Gateway endpoint URL for Prod stage for UserApi function'
-        Value: !Sub 'https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/'
+        Value: !Sub 'https://${UserApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
