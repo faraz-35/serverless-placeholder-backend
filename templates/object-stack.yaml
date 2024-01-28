@@ -39,7 +39,7 @@ Resources:
     ObjectApi:
         Type: AWS::Serverless::HttpApi
         Properties:
-            StageName: Dev
+            StageName: !Ref Environment
             Tags:
                 Environment: !Ref Environment
 
@@ -79,4 +79,4 @@ Resources:
 Outputs:
     ObjectApi:
         Description: 'API Gateway endpoint URL for Prod stage for ObjectApi function'
-        Value: !Sub 'https://${ObjectApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/'
+        Value: !Sub 'https://${ObjectApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/'
